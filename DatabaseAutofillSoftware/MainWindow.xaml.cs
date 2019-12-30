@@ -2,12 +2,14 @@
 using ViewModelInterfaces;
 using System.Diagnostics;
 using System.Windows;
+using ServicesInterface;
 
 namespace DatabaseAutofillSoftware
 {
     public partial class MainWindow : Window
     {
         IMainWindowVM _viewModel;
+        IOCRService _ocrService;
 
         public MainWindow(IMainWindowVM viewModel)
         {
@@ -56,7 +58,7 @@ namespace DatabaseAutofillSoftware
 
         private void RunClick(object sender, RoutedEventArgs e)
         {
-            _viewModel.Message = "Run OCR and Categorization script";
+            _ocrService.extractText(_viewModel.FileLocation);
         }
 
         private void OnTextChanged(object sender, RoutedEventArgs e)

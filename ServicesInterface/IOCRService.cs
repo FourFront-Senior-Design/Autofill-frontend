@@ -8,6 +8,7 @@ namespace ServicesInterface
 {
     public interface IOCRService
     {
-        bool extractText();
+        // Create a cache of JSON files with the extracted text.
+        bool extractText(string filePath);
     }
 }
