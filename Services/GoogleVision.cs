@@ -8,11 +8,11 @@ using ServicesInterface;
 
 namespace Services
 {
-    class GoogleVision : IOCRService
+    public class GoogleVision : IOCRService
     {
         public bool extractText(string filePath)
         {
-            string completePath = filePath + "/ReferencedImages";
+            string completePath = filePath + "\\ReferencedImages";
 
             Console.WriteLine(completePath);
 

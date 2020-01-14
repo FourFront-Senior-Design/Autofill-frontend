@@ -23,6 +23,8 @@ namespace DatabaseAutofillSoftware
             serviceCollection.AddTransient<IMainWindowVM, MainWindowVM>();
             serviceCollection.AddSingleton<IDatabaseService, MicrosoftAccess>();
 
+            serviceCollection.AddTransient<IOCRService, GoogleVision>();
+
             serviceCollection.AddTransient<MainWindow, MainWindow>();
 
             _serviceProvider = serviceCollection.BuildServiceProvider();

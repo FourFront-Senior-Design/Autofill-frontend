@@ -11,11 +11,13 @@ namespace DatabaseAutofillSoftware
         IMainWindowVM _viewModel;
         IOCRService _ocrService;
 
-        public MainWindow(IMainWindowVM viewModel)
+        public MainWindow(IMainWindowVM viewModel, IOCRService GoogleVision)
         {
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
+
+            _ocrService = GoogleVision;
         }
         
         private void BrowseClick(object sender, RoutedEventArgs e)
