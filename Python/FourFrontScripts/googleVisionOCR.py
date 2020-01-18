@@ -10,27 +10,26 @@ from google.cloud.vision import types
 from google.protobuf.json_format import MessageToJson
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage", sys.argv[0], "<file path to images> <output path>")
-    
+def main():    
     # This will change to something else in time. Ideally we have the credentials file somewhere secure
     # and on the network so that any PCs to which we are deployed to can run our program.
-    keyPath = "C:\Python\FourFrontScripts\credentials\FourFront Senior Design-162aa2f1754e.json"
-    print(keyPath)
+    keyPath = "credentials\FourFront Senior Design-162aa2f1754e.json"
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"]=keyPath
+    
+    filePath = ""
+    outPath = ""
     
     client = vision.ImageAnnotatorClient()
 
-    fileList = [f for f in listdir(sys.argv[1]) if isfile(join(sys.argv[1], f))]
+    fileList = [f for f in listdir(filePath) if isfile(join(filePath, f))]
     for f in fileList:
         nameParts = f.split('.')
-        outFilePath = sys.argv[2] + "\\" + nameParts[0] + ".json"
+        outFilePath = outPath + "\\" + nameParts[0] + ".json"
         print("\n", nameParts[0], nameParts[1], end=" ")
 
         if nameParts[1] == "jpg":
             if not exists(outFilePath):
-                imagePath = sys.argv[1] + "\\" + f
+                imagePath = filePath + "\\" + f
 
                 with io.open(imagePath, 'rb') as image_file:
                     content = image_file.read()

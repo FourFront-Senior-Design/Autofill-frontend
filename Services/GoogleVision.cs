@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using IronPython.Hosting;
 using ServicesInterface;
 
 namespace Services
@@ -19,6 +16,18 @@ namespace Services
             if (Directory.Exists(completePath))
             {
                 // Run GoogleVision script on the complete path and store in cache location
+                var engine = Python.CreateEngine();
+                var source = engine.CreateScriptSourceFromFile(
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                    "FourFrontScripts", "googleVisionOCR.py"));
+
+                var scope = engine.CreateScope();
+
+                engine.GetSysModule().SetVariable("filePath", filePath);
+                engine.GetSysModule().SetVariable("outPath", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OCRCache\\"));
+
+                source.Execute(scope);
+
                 return true;
             }
             else
