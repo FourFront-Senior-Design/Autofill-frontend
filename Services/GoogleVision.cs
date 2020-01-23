@@ -1,7 +1,7 @@
 ﻿using System;
-using System.IO;
-using IronPython.Hosting;
 using ServicesInterface;
+using System.Diagnostics;
+using System.IO;
 
 namespace Services
 {
@@ -9,29 +9,40 @@ namespace Services
     {
         public bool extractText(string filePath)
         {
-            string completePath = filePath + "\\ReferencedImages";
-
-            Console.WriteLine(completePath);
+            String pythonInstallation = @"C:\Python";
+            String outputDirectory = filePath + @"\GoogleVisionData";
+            String completePath = filePath + @"\ReferencedImages";
 
             if (Directory.Exists(completePath))
             {
-                // Run GoogleVision script on the complete path and store in cache location
-                var engine = Python.CreateEngine();
-                var source = engine.CreateScriptSourceFromFile(
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-                    "FourFrontScripts", "googleVisionOCR.py"));
+                Directory.CreateDirectory(outputDirectory);
 
-                var scope = engine.CreateScope();
+                ProcessStartInfo start = new ProcessStartInfo();
+                start.FileName = pythonInstallation + @"\python.exe";
+                start.Arguments = pythonInstallation + @"\FourFrontScripts\googleVisionOCR.py "
+                    + filePath + @"\ReferencedImages"
+                    + " " + outputDirectory;
 
-                engine.GetSysModule().SetVariable("filePath", filePath);
-                engine.GetSysModule().SetVariable("outPath", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OCRCache\\"));
+                start.RedirectStandardOutput = true;
+                start.UseShellExecute = false;
+                start.CreateNoWindow = true;
 
-                source.Execute(scope);
+                Trace.WriteLine(start.FileName);
+                Trace.WriteLine(start.Arguments);
+
+                using (Process process = new Process())
+                {
+                    process.StartInfo = start;
+                    process.Start();
+                    process.WaitForExit();
+                }
 
                 return true;
             }
             else
-                throw new Exception("ReferencedImages directory doesn't exist.");
+            {
+                return false;
+            }
         }
     }
 }
