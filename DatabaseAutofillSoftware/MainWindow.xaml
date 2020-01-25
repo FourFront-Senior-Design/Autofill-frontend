@@ -60,20 +60,20 @@
                 VerticalAlignment="Top">
 
                 <Button 
-                    Content="Load Data" 
+                    Content="Run OCR" 
                     Height="45" 
                     Width="130" 
                     FontSize="18"
                     Margin="10"
-                    Click="LoadDataClick" />
+                    Click="OCRClick" />
 
-                <Button 
-                    Content="Run Script" 
+                <Button
+                    Content="Autofill Data" 
                     Height="45" 
                     Width="130" 
                     FontSize="18"
                     Margin="10"
-                    Click="RunClick"
+                    Click="AutofillClick"
                     IsEnabled="{Binding EnableExtract}" />
 
                 <Button 

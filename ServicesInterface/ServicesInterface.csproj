@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IAutofillController.cs" />
     <Compile Include="ICategorizationService.cs" />
     <Compile Include="IDatabaseService.cs" />
     <Compile Include="IOCRService.cs" />

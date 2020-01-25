@@ -10,14 +10,16 @@ namespace DatabaseAutofillSoftware
     {
         IMainWindowVM _viewModel;
         IOCRService _ocrService;
+        IAutofillController _autofillService;
 
-        public MainWindow(IMainWindowVM viewModel, IOCRService GoogleVision)
+        public MainWindow(IMainWindowVM viewModel, IOCRService GoogleVision, IAutofillController autofillController)
         {
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
 
             _ocrService = GoogleVision;
+            _autofillService = autofillController;
         }
         
         private void BrowseClick(object sender, RoutedEventArgs e)
@@ -33,7 +35,7 @@ namespace DatabaseAutofillSoftware
             }
         }
 
-        private void LoadDataClick(object sender, RoutedEventArgs e)
+        private void OCRClick(object sender, RoutedEventArgs e)
         {
             Trace.WriteLine("Printing...");
             Trace.WriteLine(_viewModel.FileLocation);
@@ -52,15 +54,20 @@ namespace DatabaseAutofillSoftware
             {
                 Properties.Settings.Default.databaseFilePath = _viewModel.FileLocation;
                 Properties.Settings.Default.Save();
-                _viewModel.Message = "Successfully uploaded " + countData.ToString() +
-                                 " records from the Database";
+
+                _ocrService.extractText(_viewModel.FileLocation);
+
+                _viewModel.Message = "Successfully processed " + countData.ToString() +
+                                 " records.";
                 _viewModel.EnableRun = true;
             }
         }
 
-        private void RunClick(object sender, RoutedEventArgs e)
+        private void AutofillClick(object sender, RoutedEventArgs e)
         {
-            _ocrService.extractText(_viewModel.FileLocation);
+            _autofillService.runScripts(_viewModel.FileLocation);
+
+            // call ms access interface and push data to database
         }
 
         private void OnTextChanged(object sender, RoutedEventArgs e)
