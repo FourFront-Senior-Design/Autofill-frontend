@@ -6,7 +6,7 @@ namespace ViewModel
 {
     public class MainWindowVM: IMainWindowVM, INotifyPropertyChanged
     {
-        private IDatabaseService _database;
+        public IDatabaseService _database;
         private string _fileLocation;
         private string _message;
         private bool _enableRun = false;

@@ -3,6 +3,7 @@ using ViewModelInterfaces;
 using System.Diagnostics;
 using System.Windows;
 using ServicesInterface;
+using DataStructures;
 
 namespace DatabaseAutofillSoftware
 {
@@ -11,8 +12,9 @@ namespace DatabaseAutofillSoftware
         IMainWindowVM _viewModel;
         IOCRService _ocrService;
         IAutofillController _autofillService;
+        IDatabaseService _database;
 
-        public MainWindow(IMainWindowVM viewModel, IOCRService GoogleVision, IAutofillController autofillController)
+        public MainWindow(IMainWindowVM viewModel, IDatabaseService database, IOCRService GoogleVision, IAutofillController autofillController)
         {
             InitializeComponent();
             _viewModel = viewModel;
@@ -20,6 +22,8 @@ namespace DatabaseAutofillSoftware
 
             _ocrService = GoogleVision;
             _autofillService = autofillController;
+            _database = database;
+            
         }
         
         private void BrowseClick(object sender, RoutedEventArgs e)
@@ -66,6 +70,23 @@ namespace DatabaseAutofillSoftware
         private void AutofillClick(object sender, RoutedEventArgs e)
         {
             _autofillService.runScripts(_viewModel.FileLocation);
+
+            int countData = _viewModel.LoadData();
+            if (countData == -1)
+            {
+                _viewModel.Message = "Invalid Path. Try Again.";
+            }
+            else if (countData == 0)
+            {
+                _viewModel.Message = "No database found. Try Again.";
+            }
+            else
+            {
+                Properties.Settings.Default.databaseFilePath = _viewModel.FileLocation;
+                Properties.Settings.Default.Save();
+                _viewModel.Message = "Database loaded successfully.";
+                _viewModel.EnableRun = true;
+            }
 
             // call ms access interface and push data to database
         }

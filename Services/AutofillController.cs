@@ -15,7 +15,7 @@ namespace Services
             start.Arguments = pythonInstallation + @"\FourFrontScripts\controller.py "
                 + filePath;
 
-            start.RedirectStandardOutput = true;
+            start.RedirectStandardOutput = false;
             start.UseShellExecute = false;
             start.CreateNoWindow = true;
 
@@ -28,6 +28,7 @@ namespace Services
                 process.Start();
                 process.WaitForExit();
             }
+            Trace.WriteLine("DONE!!!");
         }
     }
 }

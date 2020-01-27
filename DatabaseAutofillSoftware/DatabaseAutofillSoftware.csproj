@@ -155,6 +155,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DataStructures\DataStructures.csproj">
+      <Project>{2AB8EA63-6BBE-4940-8A09-DE8BCDA05AF4}</Project>
+      <Name>DataStructures</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ServicesInterface\ServicesInterface.csproj">
       <Project>{8737a610-d70c-4704-bd02-8e3117fb0e5d}</Project>
       <Name>ServicesInterface</Name>
