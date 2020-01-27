@@ -88,6 +88,14 @@ namespace DatabaseAutofillSoftware
                 _viewModel.EnableRun = true;
             }
 
+            // Test setting currentHeadstone and writing to record 1 in database
+            Headstone currentHeadstone;
+            currentHeadstone = _database.GetHeadstone(1);
+            String date = "01/01/1900";
+            currentHeadstone.PrimaryDecedent.BirthDate = date;
+            _database.SetHeadstone(1, currentHeadstone);
+
+
             // call ms access interface and push data to database
         }
 
