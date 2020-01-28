@@ -100,10 +100,10 @@ namespace DatabaseAutofillSoftware
                 bool updateDB = false;
                 currentHeadstone = _database.GetHeadstone(i);
                 // check if 2nd image exists in database
-                if (currentHeadstone.Image2FileName == "")
+                if (string.IsNullOrWhiteSpace(currentHeadstone.Image2FileName))
                 {
                     // Flat markers
-                    if (currentHeadstone.MarkerType == "")
+                    if (string.IsNullOrWhiteSpace(currentHeadstone.MarkerType))
                     {
                         updateDB = true;
                         currentHeadstone.MarkerType = "Flat Marker";
@@ -145,97 +145,100 @@ namespace DatabaseAutofillSoftware
                     // Primary  
                     tmpDict.TryGetValue("BirthDate", out string bdate);
                     tmpDict.TryGetValue("DeathDate", out string ddate);
-                    Trace.WriteLine("Dates in tmpDict:");
-                    Trace.WriteLine(bdate);
-                    Trace.WriteLine(ddate);
+                    tmpDict.TryGetValue("BirthDateS_D", out string bdate2);
+                    tmpDict.TryGetValue("DeathDateS_D", out string ddate2);
+                    //Trace.WriteLine("Dates in tmpDict:");
+                    Trace.WriteLine(currentHeadstone.PrimaryDecedent.LastName);
+                    //Trace.WriteLine(bdate);
+                    //Trace.WriteLine(ddate);
+                    //Trace.WriteLine(bdate2);
+                    //Trace.WriteLine(ddate2);
                     if(tmpDict.TryGetValue("BirthDate", out string birthDate1)
-                        && currentHeadstone.PrimaryDecedent.BirthDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.PrimaryDecedent.BirthDate))
                     {
                         currentHeadstone.PrimaryDecedent.BirthDate = birthDate1;
                         updateDB = true;
-                        Trace.WriteLine(birthDate1);
                     }
                     if(tmpDict.TryGetValue("DeathDate", out string deathDate1)
-                        && currentHeadstone.PrimaryDecedent.DeathDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.PrimaryDecedent.DeathDate))
                     {
                         currentHeadstone.PrimaryDecedent.DeathDate = deathDate1;
                         updateDB = true;
-                        Trace.WriteLine(deathDate1);
                     }
                     // Secondary
                     if(tmpDict.TryGetValue("BirthDateS_D", out string birthDate2)
-                        && currentHeadstone.OthersDecedentList[0].BirthDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[0].BirthDate))
                     {
                         currentHeadstone.OthersDecedentList[0].BirthDate = birthDate2;
                         updateDB = true;
                     }
                     if(tmpDict.TryGetValue("DeathDateS_D", out string deathDate2)
-                        && currentHeadstone.OthersDecedentList[0].DeathDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[0].DeathDate))
                     {
                         currentHeadstone.OthersDecedentList[0].DeathDate = deathDate2;
                         updateDB = true;
                     }
                     // Third (NOTE: the S_D_x is correct - it's off by one)
                     if(tmpDict.TryGetValue("BirthDateS_D_2", out string birthDate3)
-                        && currentHeadstone.OthersDecedentList[1].BirthDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[1].BirthDate))
                     {
                         currentHeadstone.OthersDecedentList[1].BirthDate = birthDate3;
                         updateDB = true;
                     }
                     if(tmpDict.TryGetValue("DeathDateS_D_2", out string deathDate3)
-                        && currentHeadstone.OthersDecedentList[1].DeathDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[1].DeathDate))
                     {
                         currentHeadstone.OthersDecedentList[1].DeathDate = deathDate3;
                         updateDB = true;
                     }
                     // Fourth (NOTE: the S_D_x is correct - it's off by one)
                     if(tmpDict.TryGetValue("BirthDateS_D_3", out string birthDate4)
-                        && currentHeadstone.OthersDecedentList[2].BirthDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[2].BirthDate))
                     {
                         currentHeadstone.OthersDecedentList[2].BirthDate = birthDate4;
                         updateDB = true;
                     }
                     if(tmpDict.TryGetValue("DeathDateS_D_3", out string deathDate4)
-                        && currentHeadstone.OthersDecedentList[2].DeathDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[2].DeathDate))
                     {
                         currentHeadstone.OthersDecedentList[2].DeathDate = deathDate4;
                         updateDB = true;
                     }
                     // Fifth (NOTE: the S_D_x is correct - it's off by one)
                     if(tmpDict.TryGetValue("BirthDateS_D_4", out string birthDate5)
-                        && currentHeadstone.OthersDecedentList[3].BirthDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[3].BirthDate))
                     {
                         currentHeadstone.OthersDecedentList[3].BirthDate = birthDate5;
                         updateDB = true;
                     }
                     if(tmpDict.TryGetValue("DeathDateS_D_4", out string deathDate5)
-                        && currentHeadstone.OthersDecedentList[3].DeathDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[3].DeathDate))
                     {
                         currentHeadstone.OthersDecedentList[3].DeathDate = deathDate5;
                         updateDB = true;
                     }
                     // Sixth (NOTE: the S_D_x is correct - it's off by one)
                     if(tmpDict.TryGetValue("BirthDateS_D_5", out string birthDate6)
-                        && currentHeadstone.OthersDecedentList[4].BirthDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[4].BirthDate))
                     {
                         currentHeadstone.OthersDecedentList[4].BirthDate = birthDate6;
                         updateDB = true;
                     }
                     if(tmpDict.TryGetValue("DeathDateS_D_5", out string deathDate6)
-                        && currentHeadstone.OthersDecedentList[4].DeathDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[4].DeathDate))
                     {
                         currentHeadstone.OthersDecedentList[4].DeathDate = deathDate6;
                         updateDB = true;
                     }
                     // Seventh (NOTE: the S_D_x is correct - it's off by one)
                     if(tmpDict.TryGetValue("BirthDateS_D_6", out string birthDate7)
-                        && currentHeadstone.OthersDecedentList[5].BirthDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[5].BirthDate))
                     {
                         currentHeadstone.OthersDecedentList[5].BirthDate = birthDate7;
                         updateDB = true;
                     }
                     if(tmpDict.TryGetValue("DeathDateS_D_6", out string deathDate7)
-                        && currentHeadstone.OthersDecedentList[5].DeathDate == "")
+                        && string.IsNullOrWhiteSpace(currentHeadstone.OthersDecedentList[5].DeathDate))
                     {
                         currentHeadstone.OthersDecedentList[5].DeathDate = deathDate7;
                         updateDB = true;
@@ -244,15 +247,12 @@ namespace DatabaseAutofillSoftware
                 else
                 {
                     // Upright markers
-                    if (currentHeadstone.MarkerType == "")
+                    if (string.IsNullOrWhiteSpace(currentHeadstone.MarkerType))
                     {
                         updateDB = true;
                         currentHeadstone.MarkerType = "Upright Headstone";
                     }
                 }
-                Trace.WriteLine("Should update database with:");
-                Trace.WriteLine(currentHeadstone.PrimaryDecedent.BirthDate);
-                Trace.WriteLine(currentHeadstone.PrimaryDecedent.DeathDate);
                 if (updateDB)
                 {
                     _database.SetHeadstone(i, currentHeadstone);
