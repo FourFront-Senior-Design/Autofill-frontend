@@ -131,28 +131,12 @@ namespace DatabaseAutofillSoftware
                         }
                     }
 
-                    // Verify that the tmpDict has the correct data
-                    //foreach(KeyValuePair<string, string> kv in tmpDict)
-                    //{
-                    //    Trace.WriteLine(kv);
-                    //}
-
                     // Write dates directly to the Headstone
                     // NOTE: Thise code needs to be refactored for multiple reasons:
                     // 1) The access to non-primary decedents is terrible
                     // 2) Convert from multiple if statements to a loop
                     // 3) If possible, make this a generic "write Headstone to database" function
                     // Primary  
-                    tmpDict.TryGetValue("BirthDate", out string bdate);
-                    tmpDict.TryGetValue("DeathDate", out string ddate);
-                    tmpDict.TryGetValue("BirthDateS_D", out string bdate2);
-                    tmpDict.TryGetValue("DeathDateS_D", out string ddate2);
-                    //Trace.WriteLine("Dates in tmpDict:");
-                    Trace.WriteLine(currentHeadstone.PrimaryDecedent.LastName);
-                    //Trace.WriteLine(bdate);
-                    //Trace.WriteLine(ddate);
-                    //Trace.WriteLine(bdate2);
-                    //Trace.WriteLine(ddate2);
                     if(tmpDict.TryGetValue("BirthDate", out string birthDate1)
                         && string.IsNullOrWhiteSpace(currentHeadstone.PrimaryDecedent.BirthDate))
                     {
