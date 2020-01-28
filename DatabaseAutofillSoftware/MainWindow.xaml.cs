@@ -69,6 +69,7 @@ namespace DatabaseAutofillSoftware
 
         private void AutofillClick(object sender, RoutedEventArgs e)
         {
+            // Setup
             _autofillService.runScripts(_viewModel.FileLocation);
 
             int countData = _viewModel.LoadData();
@@ -88,12 +89,33 @@ namespace DatabaseAutofillSoftware
                 _viewModel.EnableRun = true;
             }
 
-            // Test setting currentHeadstone and writing to record 1 in database
+
+            // Autofill marker type
+            //String _date = "01/01/1900";
             Headstone currentHeadstone;
-            currentHeadstone = _database.GetHeadstone(1);
-            String date = "01/01/1900";
-            currentHeadstone.PrimaryDecedent.BirthDate = date;
-            _database.SetHeadstone(1, currentHeadstone);
+            for(int i = 1; i <= countData; i++)
+            {
+                currentHeadstone = _database.GetHeadstone(i);
+                // check if 2nd image exists in database
+                if (currentHeadstone.Image2FileName == "")
+                {
+                    // Flat markers
+                    currentHeadstone.MarkerType = "Flat Marker";
+                }
+                else
+                {
+                    // Upright markers
+                    currentHeadstone.MarkerType = "Upright Headstone";
+
+                }
+                _database.SetHeadstone(i, currentHeadstone);
+            }
+
+
+
+            //currentHeadstone = _database.GetHeadstone(1);
+            //currentHeadstone.PrimaryDecedent.BirthDate = date;
+            //_database.SetHeadstone(1, currentHeadstone);
 
 
             // call ms access interface and push data to database
