@@ -91,31 +91,36 @@ namespace DatabaseAutofillSoftware
 
 
             // Autofill marker type
-            //String _date = "01/01/1900";
             Headstone currentHeadstone;
             for(int i = 1; i <= countData; i++)
             {
+                bool updateDB = false;
                 currentHeadstone = _database.GetHeadstone(i);
                 // check if 2nd image exists in database
                 if (currentHeadstone.Image2FileName == "")
                 {
                     // Flat markers
-                    currentHeadstone.MarkerType = "Flat Marker";
+                    if (currentHeadstone.MarkerType == "")
+                    {
+                        updateDB = true;
+                        currentHeadstone.MarkerType = "Flat Marker";
+                    }
                 }
                 else
                 {
                     // Upright markers
-                    currentHeadstone.MarkerType = "Upright Headstone";
-
+                    if (currentHeadstone.MarkerType == "")
+                    {
+                        updateDB = true;
+                        currentHeadstone.MarkerType = "Upright Headstone";
+                    }
                 }
-                _database.SetHeadstone(i, currentHeadstone);
+                if (updateDB)
+                {
+                    _database.SetHeadstone(i, currentHeadstone);
+                }
+                Trace.WriteLine("Record " + i + " processed.");
             }
-
-
-
-            //currentHeadstone = _database.GetHeadstone(1);
-            //currentHeadstone.PrimaryDecedent.BirthDate = date;
-            //_database.SetHeadstone(1, currentHeadstone);
 
 
             // call ms access interface and push data to database
