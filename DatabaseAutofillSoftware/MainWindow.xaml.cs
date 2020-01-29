@@ -42,34 +42,6 @@ namespace DatabaseAutofillSoftware
             }
         }
 
-        private void OCRClick(object sender, RoutedEventArgs e)
-        {
-            Trace.WriteLine("Printing...");
-            Trace.WriteLine(_viewModel.FileLocation);
-
-            int countData = _viewModel.LoadData();
-
-            if (countData == -1)
-            {
-                _viewModel.Message = "Invalid Path. Try Again.";
-            }
-            else if (countData == 0)
-            {
-                _viewModel.Message = "No database found. Try Again.";
-            }
-            else
-            {
-                Properties.Settings.Default.databaseFilePath = _viewModel.FileLocation;
-                Properties.Settings.Default.Save();
-
-                _ocrService.extractText(_viewModel.FileLocation);
-
-                _viewModel.Message = "Successfully processed " + countData.ToString() +
-                                 " records.";
-                _viewModel.EnableRun = true;
-            }
-        }
-
         private void AutofillClick(object sender, RoutedEventArgs e)
         {
             // Setup

@@ -59,14 +59,6 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top">
 
-                <Button 
-                    Content="Run OCR" 
-                    Height="45" 
-                    Width="130" 
-                    FontSize="18"
-                    Margin="10"
-                    Click="OCRClick" />
-
                 <Button
                     Content="Autofill Data" 
                     Height="45" 
