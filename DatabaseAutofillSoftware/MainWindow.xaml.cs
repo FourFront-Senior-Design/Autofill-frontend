@@ -92,10 +92,20 @@ namespace DatabaseAutofillSoftware
                 _viewModel.EnableRun = true;
             }
 
+            // Set up AllKeys nested list
+            List<List<string>> AllKeys = new List<List<string>>();
+            AllKeys.Add(EmptyList);
+            AllKeys.Add(PrimaryKeys);
+            AllKeys.Add(SecondKeys);
+            AllKeys.Add(ThirdKeys);
+            AllKeys.Add(FourthKeys);
+            AllKeys.Add(FifthKeys);
+            AllKeys.Add(SixthKeys);
+            AllKeys.Add(SeventhKeys);
 
-            // Autofill marker type and dates
+            // Autofill marker type and other data from .tmp files
             Headstone currentHeadstone;
-            for(int i = 1; i <= countData; i++)
+            for (int i = 1; i <= countData; i++)
             {
                 bool updateDB = false;
                 currentHeadstone = _database.GetHeadstone(i);
@@ -110,24 +120,81 @@ namespace DatabaseAutofillSoftware
                     }
 
                     // Read single .tmp file for flat markers
-                    Dictionary<string, string> tmpData = ReadTmpFile(currentHeadstone);
+                    Dictionary<string, string> tmpData = ReadTmpFile(currentHeadstone.Image1FileName);
                     updateDB = UpdateHeadstone(ref currentHeadstone, tmpData);
-
                 }
                 else
                 {
-                    // Upright markers
+                    // Upright headstones
                     if (string.IsNullOrWhiteSpace(currentHeadstone.MarkerType))
                     {
                         updateDB = true;
                         currentHeadstone.MarkerType = "Upright Headstone";
                     }
+
+                    // Read both .tmp files for upright headstones
+                    Dictionary<string, string> front = ReadTmpFile(currentHeadstone.Image1FileName);
+                    Dictionary<string, string> back = ReadTmpFile(currentHeadstone.Image2FileName);
+                    int numToMerge = 0;
+                    int maxTotalDecedents = 7;
+
+                    // Find last filled decedent position on front of stone
+                    int lastFilledFront = FindLastFilledPosition(front, maxTotalDecedents);
+                    // Find last filled decedent position on back of stone
+                    int lastFilledBack = FindLastFilledPosition(back, maxTotalDecedents);
+
+                    // Calculate the number of decedents to merge from back to front
+                    if(lastFilledBack + lastFilledFront > maxTotalDecedents)
+                    {
+                        numToMerge = maxTotalDecedents - lastFilledFront;
+                    }
+                    else
+                    {
+                        numToMerge = lastFilledBack;
+                    }
+
+                    // TODO(jd): Put this into a separate function
+                    int nextPosition = lastFilledFront + 1;
+                    while (numToMerge > 0)
+                    {
+                        // need to merge into front starting at nextPosition
+                        int backPosition = 1;
+                        foreach(KeyValuePair<string, string> item in back)
+                        {
+                            // Only move keys at current backPosition
+                            // TODO(jd): check that key also exists in nextPosition on front
+                            if(AllKeys[backPosition].Contains(item.Key))
+                            {
+                                // Verify key has a value
+                                // TODO(jd): Currently only dates are handled
+                                // TODO(jd): Need to handle more fields here
+                                if(!string.IsNullOrWhiteSpace(item.Value))
+                                {
+                                    if (BirthDateKeys.Contains(item.Key))
+                                    {
+                                        front[BirthDateKeys[nextPosition]] = item.Value;
+                                    }
+                                    if (DeathDateKeys.Contains(item.Key))
+                                    {
+                                        front[DeathDateKeys[nextPosition]] = item.Value;
+                                    }
+                                }
+                            }
+                        }
+                        nextPosition++;
+                        backPosition++;
+                        numToMerge--;
+                    }
+
+                    // update headstone with combined data
+                    updateDB = UpdateHeadstone(ref currentHeadstone, front);
+
+                    if (updateDB)
+                    {
+                        _database.SetHeadstone(i, currentHeadstone);
+                    }
+                    //Trace.WriteLine("Record " + i + " processed.");
                 }
-                if (updateDB)
-                {
-                    _database.SetHeadstone(i, currentHeadstone);
-                }
-                Trace.WriteLine("Record " + i + " processed.");
             }
         }
 
@@ -143,7 +210,7 @@ namespace DatabaseAutofillSoftware
             Application.Current.Shutdown();
         }
 
-        private Dictionary<string, string> ReadTmpFile(Headstone record)
+        private Dictionary<string, string> ReadTmpFile(string filename)
         {
             // Private internal function to read file into Dictionary
             Dictionary<string, string> dict = new Dictionary<string, string>();
@@ -152,7 +219,7 @@ namespace DatabaseAutofillSoftware
 
             // Set up filename
             string path = _viewModel.FileLocation + "\\tempFiles\\"
-                + record.Image1FileName;
+                + filename;
             // Replace .jpg extension from file name
             path = path.Remove(path.Length-4, 4);
             path += ".tmp";
@@ -181,12 +248,53 @@ namespace DatabaseAutofillSoftware
             return dict;
         }
 
+
+        private int FindLastFilledPosition(Dictionary<string, string> dict , int maxTotalDecedents)
+        {
+            int lastFilledPosition = 0;
+            foreach (KeyValuePair<string, string> item in dict)
+            {
+                if (!string.IsNullOrWhiteSpace(item.Value))
+                {
+                    if (PrimaryKeys.Contains(item.Key))
+                    {
+                        lastFilledPosition = 1;
+                    }
+                    else if (SecondKeys.Contains(item.Key))
+                    {
+                        lastFilledPosition = 2;
+                    }
+                    else if (ThirdKeys.Contains(item.Key))
+                    {
+                        lastFilledPosition = 3;
+                    }
+                    else if (FourthKeys.Contains(item.Key))
+                    {
+                        lastFilledPosition = 4;
+                    }
+                    else if (FifthKeys.Contains(item.Key))
+                    {
+                        lastFilledPosition = 5;
+                    }
+                    else if (SixthKeys.Contains(item.Key))
+                    {
+                        lastFilledPosition = 6;
+                    }
+                    else if (SeventhKeys.Contains(item.Key))
+                    {
+                        lastFilledPosition = maxTotalDecedents;
+                    }
+                }
+            }
+            return lastFilledPosition;
+        }
+
         private bool UpdateHeadstone(ref Headstone h, Dictionary<string, string> tmpData)
         {
-            // Write dates to the Headstone - no overwrite of existing data
-            // NOTE: Thise code needs to be refactored for multiple reasons:
+            // Write data to the Headstone - no overwrite of existing data
+            // NOTE: This code needs to be refactored for multiple reasons:
             // 1) The access to non-primary decedents is terrible
-            // 2) Convert from multiple if statements to a loop if its possbile
+            // 2) Convert from multiple if statements to a loop if its possible
             //    to iterate through the Headstone fields in order
             // Primary  
             bool updateDB = false;
@@ -701,6 +809,376 @@ namespace DatabaseAutofillSoftware
 
             return updateDB; 
         }
+
+        // Key Lists
+        List<string> PrimaryKeys = new List<string>()
+        {
+            "First Name",
+            "Middle Name",
+            "Last Name",
+            "Suffix",
+            "Location",
+            "Rank",
+            "Rank2",
+            "Rank3",
+            "Branch",
+            "Branch2",
+            "Branch3",
+            "Branch-Unit_CustomV",
+            "War",
+            "War2",
+            "War3",
+            "War4",
+            "BirthDate",
+            "DeathDate",
+            "Award",
+            "Award2",
+            "Award3",
+            "Award4",
+            "Award5",
+            "Award6",
+            "Award7",
+            "Awards_Custom",
+            "Inscription"
+        };
+
+        List<string> SecondKeys = new List<string>()
+        {
+            "First Name Spouse/Dependent",
+            "Middle Name Spouse/Dependent",
+            "Last Name Spouse/Dependent",
+            "Suffix Spouse/Dependent",
+            "LocationS_D",
+            "RankS_D",
+            "Rank2S_D",
+            "Rank3S_D",
+            "BranchS_D",
+            "Branch2S_D",
+            "Branch3S_D",
+            "Branch-Unit_CustomS_D",
+            "WarS_D",
+            "War2S_D",
+            "War3S_D",
+            "War4S_D",
+            "BirthDateS_D",
+            "DeathDateS_D",
+            "AwardS_D",
+            "Award2S_D",
+            "Award3S_D",
+            "Award4S_D",
+            "Award5S_D",
+            "Award6S_D",
+            "Award7S_D",
+            "Awards_CustomS_D",
+            "InscriptionS_D"
+        };
+
+        List<string> ThirdKeys = new List<string>()
+        {
+            "FirstNameS_D_2",
+            "MiddleNameS_D_2",
+            "LastNameS_D_2",
+            "SuffixS_D_2",
+            "LocationS_D_2",
+            "RankS_D_2",
+            "BranchS_D_2",
+            "WarS_D_2",
+            "BirthDateS_D_2",
+            "DeathDateS_D_2",
+            "AwardS_D_2",
+            "InscriptionS_D_2"
+        };
+
+        List<string> FourthKeys = new List<string>()
+        {
+            "FirstNameS_D_3",
+            "MiddleNameS_D_3",
+            "LastNameS_D_3",
+            "SuffixS_D_3",
+            "LocationS_D_3",
+            "RankS_D_3",
+            "BranchS_D_3",
+            "WarS_D_3",
+            "BirthDateS_D_3",
+            "DeathDateS_D_3",
+            "AwardS_D_3",
+            "InscriptionS_D_3"
+        };
+
+        List<string> FifthKeys = new List<string>()
+        {
+            "FirstNameS_D_4",
+            "MiddleNameS_D_4",
+            "LastNameS_D_4",
+            "SuffixS_D_4",
+            "LocationS_D_4",
+            "RankS_D_4",
+            "BranchS_D_4",
+            "WarS_D_4",
+            "BirthDateS_D_4",
+            "DeathDateS_D_4",
+            "AwardS_D_4",
+            "InscriptionS_D_4"
+        };
+
+        List<string> SixthKeys = new List<string>()
+        {
+            "FirstNameS_D_5",
+            "MiddleNameS_D_5",
+            "LastNameS_D_5",
+            "SuffixS_D_5",
+            "LocationS_D_5",
+            "BirthDateS_D_5",
+            "DeathDateS_D_5",
+        };
+
+        List<string> SeventhKeys = new List<string>()
+        {
+            "FirstNameS_D_6",
+            "MiddleNameS_D_6",
+            "LastNameS_D_6",
+            "SuffixS_D_6",
+            "LocationS_D_6",
+            "BirthDateS_D_6",
+            "DeathDateS_D_6",
+        };
+
+        List<string> EmptyList = new List<string>()
+        {
+            "placeholder"
+        };
+
+
+        List<string> FirstNameKeys = new List<string>()
+        {
+            "placeholder",
+            "First Name",
+            "First Name Spouse/Dependent",
+            "FirstNameS_D_2",
+            "FirstNameS_D_3",
+            "FirstNameS_D_4",
+            "FirstNameS_D_5",
+            "FirstNameS_D_6"
+        };
+
+        List<string> MiddleNameKeys = new List<string>()
+        {
+            "placeholder",
+            "Middle Name",
+            "Middle Name Spouse/Dependent",
+            "MiddleNameS_D_2",
+            "MiddleNameS_D_3",
+            "MiddleNameS_D_4",
+            "MiddleNameS_D_5",
+            "MiddleNameS_D_6"
+        };
+
+        List<string> LastNameKeys = new List<string>()
+        {
+            "placeholder",
+            "Last Name",
+            "Last Name Spouse/Dependent",
+            "LastNameS_D_2",
+            "LastNameS_D_3",
+            "LastNameS_D_4",
+            "LastNameS_D_5",
+            "LastNameS_D_6"
+        };
+
+        List<string> SuffixKeys = new List<string>()
+        {
+            "placeholder",
+            "Suffix",
+            "Suffix Spouse/Dependent",
+            "SuffixS_D_2",
+            "SuffixS_D_3",
+            "SuffixS_D_4",
+            "SuffixS_D_5",
+            "SuffixS_D_6"
+        };
+
+        List<string> LocationKeys = new List<string>()
+        {
+            "placeholder",
+            "Location",
+            "LocationS_D",
+            "LocationS_D_2",
+            "LocationS_D_3",
+            "LocationS_D_4",
+            "LocationS_D_5",
+            "LocationS_D_6"
+        };
+
+        List<string> RankKeys = new List<string>()
+        {
+            "placeholder",
+            "Rank",
+            "RankS_D",
+            "RankS_D_2",
+            "RankS_D_3",
+            "RankS_D_4",
+        };
+
+        List<string> Rank2Keys = new List<string>()
+        {
+            "Rank2",
+            "Rank2S_D",
+        };
+
+        List<string> Rank3Keys = new List<string>()
+        {
+            "Rank3",
+            "Rank3S_D",
+        };
+
+        List<string> BranchKeys = new List<string>()
+        {
+            "placeholder",
+            "Branch",
+            "BranchS_D",
+            "BranchS_D_2",
+            "BranchS_D_3",
+            "BranchS_D_4",
+        };
+
+        List<string> Branch2Keys = new List<string>()
+        {
+            "Branch2",
+            "Branch2S_D",
+        };
+
+        List<string> Branch3Keys = new List<string>()
+        {
+            "Branch3",
+            "Branch3S_D",
+        };
+
+        List<string> BranchCustomKeys = new List<string>()
+        {
+            "Branch-Unit_CustomV",
+            "Branch-Unit_CustomS_D"
+        };
+
+        List<string> WarKeys = new List<string>()
+        {
+            "placeholder",
+            "War",
+            "WarS_D",
+            "WarS_D_2",
+            "WarS_D_3",
+            "WarS_D_4",
+        };
+
+        List<string> War2Keys = new List<string>()
+        {
+            "War2",
+            "War2S_D",
+        };
+
+        List<string> War3Keys = new List<string>()
+        {
+            "War3",
+            "War3S_D",
+        };
+
+        List<string> War4Keys = new List<string>()
+        {
+            "War4",
+            "War4S_D",
+        };
+
+        List<string> BirthDateKeys = new List<string>()
+        {
+            "placeholder",
+            "BirthDate",
+            "BirthDateS_D",
+            "BirthDateS_D_2",
+            "BirthDateS_D_3",
+            "BirthDateS_D_4",
+            "BirthDateS_D_5",
+            "BirthDateS_D_6"
+        };
+        
+        List<string> DeathDateKeys = new List<string>()
+        {
+            "placeholder",
+            "DeathDate",
+            "DeathDateS_D",
+            "DeathDateS_D_2",
+            "DeathDateS_D_3",
+            "DeathDateS_D_4",
+            "DeathDateS_D_5",
+            "DeathDateS_D_6"
+        };
+
+        List<string> AwardKeys = new List<string>()
+        {
+            "placeholder",
+            "Award",
+            "AwardS_D",
+            "AwardS_D_2",
+            "AwardS_D_3",
+            "AwardS_D_4",
+        };
+
+        List<string> Award2Keys = new List<string>()
+        {
+            "placeholder",
+            "Award2",
+            "Award2S_D",
+        };
+
+        List<string> Award3Keys = new List<string>()
+        {
+            "placeholder",
+            "Award3",
+            "Award3S_D",
+        };
+
+        List<string> Award4Keys = new List<string>()
+        {
+            "placeholder",
+            "Award4",
+            "Award4S_D",
+        };
+
+        List<string> Award5Keys = new List<string>()
+        {
+            "placeholder",
+            "Award5",
+            "Award5S_D",
+        };
+
+        List<string> Award6Keys = new List<string>()
+        {
+            "placeholder",
+            "Award6",
+            "Award6S_D",
+        };
+
+        List<string> Award7Keys = new List<string>()
+        {
+            "placeholder",
+            "Award7",
+            "Award7S_D",
+        };
+
+        List<string> AwardCustomKeys = new List<string>()
+        {
+            "placeholder",
+            "Awards_Custom",
+            "Awards_CustomS_D",
+        };
+
+        List<string> InscriptionKeys = new List<string>()
+        {
+            "placeholder",
+            "Inscription",
+            "InscriptionS_D",
+            "InscriptionS_D_2",
+            "InscriptionS_D_3",
+            "InscriptionS_D_4"
+        };
 
     }
 }
