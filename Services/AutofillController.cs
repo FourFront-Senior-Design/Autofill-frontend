@@ -13,7 +13,7 @@ namespace Services
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = pythonInstallation + @"\python.exe";
             start.Arguments = pythonInstallation + @"\FourFrontScripts\controller.py "
-                + filePath;
+                + "\"" + filePath + "\"";
 
             start.RedirectStandardOutput = false;
             start.UseShellExecute = false;

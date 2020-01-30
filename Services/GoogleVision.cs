@@ -20,8 +20,8 @@ namespace Services
                 ProcessStartInfo start = new ProcessStartInfo();
                 start.FileName = pythonInstallation + @"\python.exe";
                 start.Arguments = pythonInstallation + @"\FourFrontScripts\googleVisionOCR.py "
-                    + filePath + @"\ReferencedImages"
-                    + " " + outputDirectory;
+                    + "\"" + filePath + @"\ReferencedImages" + "\""
+                    + " \"" + outputDirectory + "\"";
 
                 start.RedirectStandardOutput = true;
                 start.UseShellExecute = false;
