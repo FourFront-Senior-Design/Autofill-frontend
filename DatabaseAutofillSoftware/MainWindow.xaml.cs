@@ -16,6 +16,7 @@ namespace DatabaseAutofillSoftware
         IOCRService _ocrService;
         IAutofillController _autofillService;
         IDatabaseService _database;
+        private bool _DeleteTempFilesDirectory = true;
 
         public MainWindow(IMainWindowVM viewModel, IDatabaseService database, IOCRService GoogleVision, IAutofillController autofillController)
         {
@@ -168,6 +169,12 @@ namespace DatabaseAutofillSoftware
                     //Trace.WriteLine("Record " + i + " processed.");
                 }
             }
+            // delete tempFiles directory
+            if (_DeleteTempFilesDirectory)
+            {
+                string tempFilesPath = _viewModel.FileLocation + "\\tempFiles\\";
+                System.IO.Directory.Delete(tempFilesPath, true);
+            }
         }
 
         private void OnTextChanged(object sender, RoutedEventArgs e)
@@ -265,7 +272,7 @@ namespace DatabaseAutofillSoftware
         {
             // Write data to the Headstone - no overwrite of existing data
             // NOTE: This code needs to be refactored for multiple reasons:
-            // 1) The access to non-primary decedents is terrible
+            // 1) The access to non-primary decedents is difficult
             // 2) Convert from multiple if statements to a loop if its possible
             //    to iterate through the Headstone fields in order
             // Primary  
@@ -1151,6 +1158,5 @@ namespace DatabaseAutofillSoftware
             "InscriptionS_D_3",
             "InscriptionS_D_4"
         };
-
     }
 }
