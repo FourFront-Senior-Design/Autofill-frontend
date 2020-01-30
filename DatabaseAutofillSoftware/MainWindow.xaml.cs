@@ -161,12 +161,15 @@ namespace DatabaseAutofillSoftware
 
                     // update headstone with combined data
                     updateDB = UpdateHeadstone(ref currentHeadstone, front);
+                }
 
-                    if (updateDB)
-                    {
-                        _database.SetHeadstone(i, currentHeadstone);
-                    }
-                    //Trace.WriteLine("Record " + i + " processed.");
+                if (updateDB)
+                {
+                    _database.SetHeadstone(i, currentHeadstone);
+                    // Debug info
+                    Trace.WriteLine(currentHeadstone.PrimaryDecedent.BirthDate);
+                    Trace.WriteLine(currentHeadstone.PrimaryDecedent.DeathDate);
+                    Trace.WriteLine("Record " + i + " processed.");
                 }
             }
             // delete tempFiles directory
