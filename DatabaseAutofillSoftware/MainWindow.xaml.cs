@@ -61,7 +61,7 @@ namespace DatabaseAutofillSoftware
             {
                 Properties.Settings.Default.databaseFilePath = _viewModel.FileLocation;
                 Properties.Settings.Default.Save();
-                _viewModel.Message = "Database loaded successfully.";
+                _viewModel.Message = "Database autofilled successfully.";
                 _viewModel.EnableRun = true;
             }
 
