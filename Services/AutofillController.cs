@@ -14,8 +14,7 @@ namespace Services
             start.FileName = pythonInstallation + @"\python.exe";
             start.Arguments = pythonInstallation + @"\FourFrontScripts\controller.py "
                 + "\"" + filePath + "\"";
-
-            start.RedirectStandardOutput = false;
+            
             start.UseShellExecute = false;
             start.CreateNoWindow = true;
 
@@ -28,7 +27,7 @@ namespace Services
                 process.Start();
                 process.WaitForExit();
             }
-            Trace.WriteLine("DONE!!!");
+            Trace.WriteLine("Scripts ran successfully");
         }
     }
 }
