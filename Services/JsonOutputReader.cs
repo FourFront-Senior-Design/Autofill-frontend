@@ -41,6 +41,7 @@ namespace Services
             {
                 bool updateDB = false;
                 currentHeadstone = _database.GetHeadstone(i);
+
                 // check if 2nd image exists in database
                 if (string.IsNullOrWhiteSpace(currentHeadstone.Image2FileName))
                 {
@@ -87,10 +88,10 @@ namespace Services
 
                     // TODO(jd): Put this into a separate function
                     int nextPosition = lastFilledFront + 1;
+                    // need to merge into front starting at nextPosition
+                    int backPosition = 1;
                     while (numToMerge > 0)
                     {
-                        // need to merge into front starting at nextPosition
-                        int backPosition = 1;
                         foreach (KeyValuePair<string, string> item in back)
                         {
                             // Only move keys at current backPosition
@@ -126,9 +127,9 @@ namespace Services
                 {
                     _database.SetHeadstone(i, currentHeadstone);
                     // Debug info
-                    Trace.WriteLine(currentHeadstone.PrimaryDecedent.BirthDate);
-                    Trace.WriteLine(currentHeadstone.PrimaryDecedent.DeathDate);
-                    Trace.WriteLine("Record " + i + " processed.");
+                    //Trace.WriteLine(currentHeadstone.PrimaryDecedent.BirthDate);
+                    //Trace.WriteLine(currentHeadstone.PrimaryDecedent.DeathDate);
+                    //Trace.WriteLine("Record " + i + " processed.");
                 }
             }
             // delete tempFiles directory
