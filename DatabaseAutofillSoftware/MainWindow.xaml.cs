@@ -22,7 +22,6 @@ namespace DatabaseAutofillSoftware
             _database = database;
             _outputReader = outputReader;
 
-            _viewModel.FileLocation = Properties.Settings.Default.databaseFilePath;
             sectionPath.Focus();
             sectionPath.Select(_viewModel.FileLocation.Length, 0);
         }
