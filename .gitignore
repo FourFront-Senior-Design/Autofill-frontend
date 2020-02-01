@@ -3,4 +3,4 @@ obj/
 Debug/
 Release/
 .vs/
-TestDatabases/
+/TestDatabases/
