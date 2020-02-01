@@ -42,6 +42,13 @@ namespace Services
                 bool updateDB = false;
                 currentHeadstone = _database.GetHeadstone(i);
 
+                // Set WallID to 0
+                if (string.IsNullOrEmpty(currentHeadstone.WallID))
+                {
+                    currentHeadstone.WallID = "0";
+                    updateDB = true;
+                }
+
                 // check if 2nd image exists in database
                 if (string.IsNullOrWhiteSpace(currentHeadstone.Image2FileName))
                 {
