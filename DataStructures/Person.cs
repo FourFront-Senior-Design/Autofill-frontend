@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataStructures
 {
@@ -29,6 +26,36 @@ namespace DataStructures
             AwardList = new List<string>();
             BranchList = new List<string>();
             WarList = new List<string>();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Person person))
+            {
+                return false;
+            }
+
+            if (FirstName == person.FirstName &&
+                MiddleName == person.MiddleName &&
+                LastName == person.LastName &&
+                Suffix == person.Suffix &&
+                Location == person.Location &&
+                BirthDate == person.BirthDate &&
+                DeathDate == person.DeathDate &&
+                BranchUnitCustom == person.BranchUnitCustom &&
+                AwardCustom == person.AwardCustom &&
+                Inscription == person.Inscription &&
+                AwardList.SequenceEqual(person.AwardList) &&
+                WarList.SequenceEqual(person.WarList) &&
+                RankList.SequenceEqual(person.RankList) &&
+                BranchList.SequenceEqual(person.BranchList))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

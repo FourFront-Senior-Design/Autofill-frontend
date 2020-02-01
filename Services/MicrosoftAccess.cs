@@ -1,5 +1,6 @@
 ﻿using Common;
 using DataStructures;
+using NLog;
 using ServicesInterface;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace Services
     {
         private string _connectionString;
 
+        private List<string> SequenceIDs { get; set; }
+
         public int TotalItems { get; private set; }
 
         public List<CemeteryNameData> CemeteryNames { get; private set; }
@@ -27,97 +30,71 @@ namespace Services
 
         public List<AwardData> AwardNames { get; private set; }
 
-        public List<string> SequenceIDs { get; private set; }
-
         public string SectionFilePath { get; private set; } = string.Empty;
+
+        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
         public bool InitDBConnection(string sectionFilePath)
         {
             SectionFilePath = sectionFilePath;
 
+
+            GetAccessFilePath();
+            TestFileAccess();
+
+            TotalItems = GetTotalRecords();
+
+            CemeteryNames = GetCemeteryData();
+            LocationNames = GetLocationData();
+            BranchNames = GetBranchData();
+            AwardNames = GetAwardData();
+            WarNames = GetWarData();
+            SequenceIDs = GetSequenceIDs();
+
+            return true;
+        }
+
+        private void GetAccessFilePath()
+        {
+
+            Regex reg = new Regex(@".*_be.accdb");
+
             try
             {
-                Regex reg = new Regex(@".*_be.accdb");
-
-                var Dbfiles = Directory.GetFiles(sectionFilePath)
-                    .Where(path => reg.IsMatch(path))
-                    .ToList();
+                var Dbfiles = Directory.GetFiles(SectionFilePath)
+                                        .Where(path => reg.IsMatch(path))
+                                        .ToList();
 
                 // set the connection string
                 _connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + Dbfiles[0];
+            }
+            catch (Exception e)
+            {
+                var errorMessage = $"Error Accessing MS Access File with path: {SectionFilePath}";
+                ThrowAndLogArgumentException(errorMessage);
+            }
+        }
 
+        private void TestFileAccess()
+        {
+            try
+            {
                 // create the db connection
                 using (OleDbConnection connection = new OleDbConnection(_connectionString))
                 // using to ensure connection is closed when we are done
                 {
-                    try
-                    {
-                        connection.Open(); // try to open the connection
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        return false;
-                    }
+                    connection.Open(); // try to open the connection
                 }
-
-                TotalItems = GetTotalRecords();
-                CemeteryNames = GetCemeteryData();
-                LocationNames = GetLocationData();
-                BranchNames = GetBranchData();
-                AwardNames = GetAwardData();
-                WarNames = GetWarData();
-                SequenceIDs = GetSequenceIDs();
-
-                return true;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return false;
+                var errorMessage = $"Error Accessing MS Access Database this is likely due to a mismatch in database drivers\n" +
+                    $"Please ensure you have the Microsoft Access Database Engine (x64) 2010 Redistributable" +
+                    $" by going to this link:https://www.microsoft.com/en-us/download/details.aspx?id=54920 " +
+                    $"and selecting the x64 bit version.";
+                ThrowAndLogArgumentException(errorMessage);
             }
-        }
 
-        private List<string> GetSequenceIDs()
-        {
-            List<string> sequenceIDs = new List<string>();
-
-            using (OleDbConnection connection = new OleDbConnection(_connectionString))
-            {
-                OleDbCommand cmd;
-                OleDbDataReader reader;
-
-                try
-                {
-                    connection.Open();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error Accessing Database");
-                    throw e;
-                }
-
-                try
-                {
-                    string sqlQuery = "SELECT SequenceID FROM Master;";
-                    cmd = new OleDbCommand(sqlQuery, connection);
-                    reader = cmd.ExecuteReader();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error Querying for SequenceIDs");
-                    throw e;
-                }
-
-                while (reader.Read())
-                {
-                    sequenceIDs.Add(reader.GetString(0));
-                }
-
-                reader.Close();
-            }
-            sequenceIDs.Sort();
-            return sequenceIDs;
         }
 
         private int GetTotalRecords()
@@ -125,6 +102,7 @@ namespace Services
             string sqlQuery = "SELECT COUNT(SequenceID) FROM Master";
             OleDbCommand cmd;
             OleDbDataReader reader;
+            int totalRecords = 0;
 
             using (OleDbConnection connection = new OleDbConnection(_connectionString)) // using to ensure connection is closed when we are done
             {
@@ -132,51 +110,70 @@ namespace Services
                 {
                     cmd = new OleDbCommand(sqlQuery, connection);
                     connection.Open(); // try to open the connection
+                    reader = cmd.ExecuteReader();
+                    reader.Read();
+                    totalRecords = reader.GetInt32(0);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error accessing Database");
-                    throw e;
+                    ThrowAndLogArgumentException("Error getting total record count", e);
                 }
-
-                reader = cmd.ExecuteReader();
-                reader.Read();
-
-                return reader.GetInt32(0);
             }
 
+            return totalRecords;
         }
 
         public Headstone GetHeadstone(int index)
         {
-            string sqlQuery = "SELECT * FROM Master WHERE SequenceID = \"" + SequenceIDs[index-1] + "\"";
-
+            string sqlQuery = "SELECT * FROM Master WHERE SequenceID = \"" + SequenceIDs[index - 1] + "\"";
             Headstone headstone = new Headstone();
 
-            var dataRow = GetDataRow(sqlQuery);
+            try
+            {
+                var dataRow = GetDataRow(sqlQuery);
+                headstone.SequenceID = dataRow[(int)MasterTableCols.SequenceID].ToString();
+                headstone.PrimaryKey = dataRow[(int)MasterTableCols.PrimaryKey].ToString();
+                headstone.CemeteryName = dataRow[(int)MasterTableCols.CemeteryName].ToString();
+                headstone.BurialSectionNumber = dataRow[(int)MasterTableCols.BurialSectionNumber].ToString();
+                headstone.WallID = dataRow[(int)MasterTableCols.Wall].ToString();
+                headstone.RowNum = dataRow[(int)MasterTableCols.RowNumber].ToString();
+                headstone.GavestoneNumber = dataRow[(int)MasterTableCols.GravesiteNumber].ToString();
+                headstone.MarkerType = dataRow[(int)MasterTableCols.MarkerType].ToString();
+                headstone.Emblem1 = dataRow[(int)MasterTableCols.Emblem1].ToString();
+                headstone.Emblem2 = dataRow[(int)MasterTableCols.Emblem2].ToString();
 
-            headstone.SequenceID = dataRow[(int)MasterTableCols.SequenceID].ToString();
-            headstone.PrimaryKey = dataRow[(int)MasterTableCols.PrimaryKey].ToString();
-            headstone.CemeteryName = dataRow[(int)MasterTableCols.CemeteryName].ToString();
-            headstone.BurialSectionNumber = dataRow[(int)MasterTableCols.BurialSectionNumber].ToString();
-            headstone.WallID = dataRow[(int)MasterTableCols.Wall].ToString();
-            headstone.RowNum = dataRow[(int)MasterTableCols.RowNumber].ToString();
-            headstone.GavestoneNumber = dataRow[(int)MasterTableCols.GravesiteNumber].ToString();
-            headstone.MarkerType = dataRow[(int)MasterTableCols.MarkerType].ToString();
-            headstone.Emblem1 = dataRow[(int)MasterTableCols.Emblem1].ToString();
-            headstone.Emblem2 = dataRow[(int)MasterTableCols.Emblem2].ToString();
+                headstone.PrimaryDecedent = GetPrimaryPerson(dataRow);
 
-            headstone.PrimaryDecedent = GetPrimaryPerson(dataRow);
+                headstone.OthersDecedentList = GetAddtionalDecedents(dataRow);
 
-            headstone.OthersDecedentList = GetAddtionalDecedents(dataRow);
+                Console.WriteLine((int)MasterTableCols.FrontFilename);
+                headstone.Image1FilePath = dataRow[(int)MasterTableCols.FrontFilename].ToString();
+                headstone.Image2FilePath = dataRow[(int)MasterTableCols.BackFilename].ToString();
 
-            headstone.Image1FilePath = dataRow[(int)MasterTableCols.FrontFilename].ToString();
-            headstone.Image2FilePath = dataRow[(int)MasterTableCols.BackFilename].ToString();
+                headstone.Image1FileName = Path.GetFileName(headstone.Image1FilePath);
+                headstone.Image2FileName = Path.GetFileName(headstone.Image2FilePath);
+            }
+            catch (Exception e)
+            {
 
-            headstone.Image1FileName = Path.GetFileName(headstone.Image1FilePath);
-            headstone.Image2FileName = Path.GetFileName(headstone.Image2FilePath);
+                ThrowAndLogArgumentException($"Error getting headstone with SequenceID at ${index.ToString()}", e);
+            }
 
             return headstone;
+        }
+
+        private void ThrowAndLogArgumentException(string errorMessage, Exception innerException = null)
+        {
+            if (innerException == null)
+            {
+                logger.Log(LogLevel.Error, errorMessage);
+                throw new ArgumentException(errorMessage, innerException);
+            }
+            else
+            {
+                logger.Log(LogLevel.Error, errorMessage);
+                throw new ArgumentException(errorMessage);
+            }
         }
 
         private object[] GetDataRow(string sqlQuery)
@@ -186,12 +183,12 @@ namespace Services
             object[] dataRow;
 
 
-            using (OleDbConnection connection = new OleDbConnection(_connectionString))
+            using (OleDbConnection connection = new OleDbConnection(_connectionString)) // using to ensure connection is closed when we are done
             {
                 try
                 {
                     cmd = new OleDbCommand(sqlQuery, connection);
-                    connection.Open();
+                    connection.Open(); // try to open the connection
                 }
                 catch (Exception e)
                 {
@@ -437,35 +434,34 @@ namespace Services
 
             using (OleDbConnection connection = new OleDbConnection(_connectionString))
             {
+                cmd = new OleDbCommand(sqlQuery, connection);
+                connection.Open();
+
                 try
                 {
-                    cmd = new OleDbCommand(sqlQuery, connection);
-                    connection.Open();
+                    reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        CemeteryNameData data = new CemeteryNameData();
+
+                        data.ID = reader.GetInt32(0);
+                        data.CemeteryName = reader.GetString(1).ToUpper();
+                        data.KeyName = reader.GetString(2).ToUpper();
+
+                        CemetaryData.Add(data);
+                    }
+                    reader.Close();
+                    connection.Close();
+
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error accsessing Database");
-                    throw e;
+                    ThrowAndLogArgumentException("Error getting cemetery data", e);
                 }
-
-                reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    CemeteryNameData data = new CemeteryNameData();
-
-                    data.ID = reader.GetInt32(0);
-                    data.CemeteryName = reader.GetString(1).ToUpper();
-                    data.KeyName = reader.GetString(2).ToUpper();
-
-                    CemetaryData.Add(data);
-                }
-
-
-                reader.Close();
-                connection.Close();
             }
 
+            CemetaryData = CemetaryData.OrderBy(x => x.CemeteryName).ToList();
             return CemetaryData;
         }
 
@@ -479,34 +475,36 @@ namespace Services
 
             using (OleDbConnection connection = new OleDbConnection(_connectionString))
             {
+
+                cmd = new OleDbCommand(sqlQuery, connection);
+                connection.Open();
+
                 try
                 {
-                    cmd = new OleDbCommand(sqlQuery, connection);
-                    connection.Open();
+                    reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        AwardData data = new AwardData();
+
+                        data.Code = reader.GetString(0).ToUpper();
+                        data.Award = reader.GetString(1).ToUpper();
+
+                        AwardNames.Add(data);
+                    }
+
+
+                    reader.Close();
+                    connection.Close();
+
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error accsessing Database");
-                    throw e;
+                    ThrowAndLogArgumentException("Error getting award data", e);
                 }
-
-                reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    AwardData data = new AwardData();
-
-                    data.Code = reader.GetString(0).ToUpper();
-                    data.Award = reader.GetString(1).ToUpper();
-
-                    AwardNames.Add(data);
-                }
-
-
-                reader.Close();
-                connection.Close();
             }
 
+            AwardNames = AwardNames.OrderBy(x => x.Code).ToList();
             return AwardNames;
         }
 
@@ -549,6 +547,7 @@ namespace Services
                 connection.Close();
             }
 
+            BranchNames = BranchNames.OrderBy(x => x.Code).ToList();
             return BranchNames;
         }
 
@@ -590,8 +589,11 @@ namespace Services
                 connection.Close();
             }
 
+            WarNames = WarNames.OrderBy(x => x.Code).ToList();
             return WarNames;
         }
+
+
 
         private List<LocationData> GetLocationData()
         {
@@ -633,36 +635,62 @@ namespace Services
                 connection.Close();
             }
 
+            LocationNames = LocationNames.OrderBy(x => x.Location).ToList();
             return LocationNames;
         }
 
         private string getCemeteryKey(string cemeteryName)
         {
-            OleDbCommand cmd;
-            OleDbDataReader reader;
-            string key = "";
-
-            string sqlQuery = "SELECT KeyCode From CemeteryNames Where CemeteryName = '" + cemeteryName + "';";
+            foreach (CemeteryNameData cemetery in CemeteryNames)
+            {
+                if (cemetery.CemeteryName == cemeteryName)
+                {
+                    return cemetery.KeyName;
+                }
+            }
+            return "";
+        }
+        
+        private List<string> GetSequenceIDs()
+        {
+            List<string> sequenceIDs = new List<string>();
 
             using (OleDbConnection connection = new OleDbConnection(_connectionString))
             {
+                OleDbCommand cmd;
+                OleDbDataReader reader;
+
                 try
                 {
-                    cmd = new OleDbCommand(sqlQuery, connection);
                     connection.Open();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error Accessing Database");
+                    throw e;
+                }
+
+                try
+                {
+                    string sqlQuery = "SELECT SequenceID FROM Master;";
+                    cmd = new OleDbCommand(sqlQuery, connection);
                     reader = cmd.ExecuteReader();
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Could Not Query for Cemetery KeyCode");
+                    Console.WriteLine("Error Querying for SequenceIDs");
                     throw e;
                 }
 
-                if (reader.Read())
-                    key = reader.GetString(0);
-            }
+                while (reader.Read())
+                {
+                    sequenceIDs.Add(reader.GetString(0));
+                }
 
-            return key;
+                reader.Close();
+            }
+            sequenceIDs.Sort();
+            return sequenceIDs;
         }
 
         public void SetHeadstone(int index, Headstone headstone)
@@ -692,7 +720,8 @@ namespace Services
                 "', [Branch-Unit_CustomS_D] = '" + headstone.OthersDecedentList[0].BranchUnitCustom + "'";
 
             // finalize update statement
-            sqlQuery += @" WHERE AccessUniqueID = " + index;
+            //sqlQuery += @" WHERE SequenceID = '" + sequenceID[index] + @"';";
+            sqlQuery += @" WHERE SequenceID = '" + SequenceIDs[index - 1] + "';";
 
             OleDbCommand cmd;
             using (OleDbConnection connection = new OleDbConnection(_connectionString)) // using to ensure connection is closed when we are done

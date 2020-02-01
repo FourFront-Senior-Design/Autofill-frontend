@@ -9,13 +9,12 @@ namespace ViewModel
         public IDatabaseService _database;
         private string _fileLocation;
         private string _message;
-        private bool _enableRun = false;
 
         public string Copyright
         {
             get
             {
-                return "Senior Design Data Extraction Project" + "\u00a9" + "2019. Version 1.0";
+                return "Senior Design Data Extraction Project" + "\u00a9" + "2020. Version 1.0";
             }
         }
 
@@ -42,19 +41,6 @@ namespace ViewModel
             {
                 _fileLocation = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FileLocation)));
-            }
-        }
-
-        public bool EnableRun
-        {
-            get
-            {
-                return _enableRun;
-            }
-            set
-            {
-                _enableRun = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EnableRun)));
             }
         }
 
