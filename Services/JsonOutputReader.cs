@@ -37,6 +37,9 @@ namespace Services
         {
             // Autofill marker type and other data from .tmp files
             Headstone currentHeadstone;
+            int totalUprights = 0;
+            int totalFlats = 0;
+
             for (int i = 1; i <= _database.TotalItems; i++)
             {
                 bool updateDB = false;
@@ -53,6 +56,7 @@ namespace Services
                 if (string.IsNullOrWhiteSpace(currentHeadstone.Image2FileName))
                 {
                     // Flat markers
+                    totalFlats++;
                     if (string.IsNullOrWhiteSpace(currentHeadstone.MarkerType))
                     {
                         updateDB = true;
@@ -66,6 +70,7 @@ namespace Services
                 else
                 {
                     // Upright headstones
+                    totalUprights++;
                     if (string.IsNullOrWhiteSpace(currentHeadstone.MarkerType))
                     {
                         updateDB = true;
@@ -145,6 +150,12 @@ namespace Services
                 string tempFilesPath = _database.SectionFilePath + "\\tempFiles\\";
                 System.IO.Directory.Delete(tempFilesPath, true);
             }
+
+            // write totalFlats and totalUprights to file "MarkerTypeSummary.txt"
+            StreamWriter writer = new StreamWriter(_database.SectionFilePath + "\\MarkerTypeSummary.txt");
+            writer.Write("Uprights: " + totalUprights.ToString());
+            writer.Write("\nFlats: " +  totalFlats.ToString());
+            writer.Close();
         }
 
         private Dictionary<string, string> ReadTmpFile(string filename)
