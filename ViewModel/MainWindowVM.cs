@@ -7,7 +7,7 @@ namespace ViewModel
     public class MainWindowVM: IMainWindowVM, INotifyPropertyChanged
     {
         public IDatabaseService _database;
-        private string _fileLocation;
+        private string _fileLocation = string.Empty;
         private string _message;
 
         public string Copyright

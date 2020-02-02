@@ -41,6 +41,14 @@ namespace Services
             {
                 bool updateDB = false;
                 currentHeadstone = _database.GetHeadstone(i);
+
+                // Set WallID to 0
+                if (string.IsNullOrEmpty(currentHeadstone.WallID))
+                {
+                    currentHeadstone.WallID = "0";
+                    updateDB = true;
+                }
+
                 // check if 2nd image exists in database
                 if (string.IsNullOrWhiteSpace(currentHeadstone.Image2FileName))
                 {
@@ -87,10 +95,10 @@ namespace Services
 
                     // TODO(jd): Put this into a separate function
                     int nextPosition = lastFilledFront + 1;
+                    // need to merge into front starting at nextPosition
+                    int backPosition = 1;
                     while (numToMerge > 0)
                     {
-                        // need to merge into front starting at nextPosition
-                        int backPosition = 1;
                         foreach (KeyValuePair<string, string> item in back)
                         {
                             // Only move keys at current backPosition
@@ -104,11 +112,11 @@ namespace Services
                                 {
                                     if (_jsonKeys.BirthDateKeys.Contains(item.Key))
                                     {
-                                        front[_jsonKeys.BirthDateKeys[nextPosition]] = item.Value;
+                                        front[_jsonKeys.BirthDateKeys[nextPosition]] = item.Value.Trim('\r');
                                     }
                                     if (_jsonKeys.DeathDateKeys.Contains(item.Key))
                                     {
-                                        front[_jsonKeys.DeathDateKeys[nextPosition]] = item.Value;
+                                        front[_jsonKeys.DeathDateKeys[nextPosition]] = item.Value.Trim('\r');
                                     }
                                 }
                             }
@@ -126,9 +134,9 @@ namespace Services
                 {
                     _database.SetHeadstone(i, currentHeadstone);
                     // Debug info
-                    Trace.WriteLine(currentHeadstone.PrimaryDecedent.BirthDate);
-                    Trace.WriteLine(currentHeadstone.PrimaryDecedent.DeathDate);
-                    Trace.WriteLine("Record " + i + " processed.");
+                    //Trace.WriteLine(currentHeadstone.PrimaryDecedent.BirthDate);
+                    //Trace.WriteLine(currentHeadstone.PrimaryDecedent.DeathDate);
+                    //Trace.WriteLine("Record " + i + " processed.");
                 }
             }
             // delete tempFiles directory
@@ -165,11 +173,11 @@ namespace Services
                 string[] line = item.Split(':');
                 if (line.Length == 2)
                 {
-                    dict.Add(line[0], line[1]);
+                    dict.Add(line[0], line[1].Trim('\r'));
                 }
                 else if (line.Length == 1 && !string.IsNullOrEmpty(line[0]))
                 {
-                    dict.Add(line[0], "");
+                    dict.Add(line[0], null);
                 }
             }
 
@@ -230,31 +238,31 @@ namespace Services
             if (tmpData.TryGetValue("First Name", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.FirstName))
             {
-                h.PrimaryDecedent.FirstName = value;
+                h.PrimaryDecedent.FirstName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("Middle Name", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.MiddleName))
             {
-                h.PrimaryDecedent.MiddleName = value;
+                h.PrimaryDecedent.MiddleName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("Last Name", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.LastName))
             {
-                h.PrimaryDecedent.LastName = value;
+                h.PrimaryDecedent.LastName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("Suffix", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.Suffix))
             {
-                h.PrimaryDecedent.Suffix = value;
+                h.PrimaryDecedent.Suffix = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("Location", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.Location))
             {
-                h.PrimaryDecedent.Location = value;
+                h.PrimaryDecedent.Location = value.Trim('\r');
                 updateDB = true;
             }
             List<string> Ranks = new List<string>() { "Rank", "Rank2", "Rank3" };
@@ -263,7 +271,7 @@ namespace Services
                 if (tmpData.TryGetValue(Ranks[i], out value)
                     && string.IsNullOrWhiteSpace(h.PrimaryDecedent.RankList[i]))
                 {
-                    h.PrimaryDecedent.RankList[i] = value;
+                    h.PrimaryDecedent.RankList[i] = value.Trim('\r');
                     updateDB = true;
                 }
             }
@@ -273,14 +281,14 @@ namespace Services
                 if (tmpData.TryGetValue(Branches[i], out value)
                     && string.IsNullOrWhiteSpace(h.PrimaryDecedent.BranchList[i]))
                 {
-                    h.PrimaryDecedent.BranchList[i] = value;
+                    h.PrimaryDecedent.BranchList[i] = value.Trim('\r');
                     updateDB = true;
                 }
             }
             if (tmpData.TryGetValue("Branch-Unit_CustomV", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.BranchUnitCustom))
             {
-                h.PrimaryDecedent.BranchUnitCustom = value;
+                h.PrimaryDecedent.BranchUnitCustom = value.Trim('\r');
                 updateDB = true;
             }
             List<string> Wars = new List<string>() { "War", "War2", "War3", "War4" };
@@ -289,20 +297,20 @@ namespace Services
                 if (tmpData.TryGetValue(Wars[i], out value)
                     && string.IsNullOrWhiteSpace(h.PrimaryDecedent.WarList[i]))
                 {
-                    h.PrimaryDecedent.WarList[i] = value;
+                    h.PrimaryDecedent.WarList[i] = value.Trim('\r');
                     updateDB = true;
                 }
             }
             if (tmpData.TryGetValue("BirthDate", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.BirthDate))
             {
-                h.PrimaryDecedent.BirthDate = value;
+                h.PrimaryDecedent.BirthDate = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("DeathDate", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.DeathDate))
             {
-                h.PrimaryDecedent.DeathDate = value;
+                h.PrimaryDecedent.DeathDate = value.Trim('\r');
                 updateDB = true;
             }
             List<string> Awards = new List<string>() { "Award", "Award2", "Award3", "Award4", "Award5", "Award6", "Award7" };
@@ -311,51 +319,51 @@ namespace Services
                 if (tmpData.TryGetValue(Awards[i], out value)
                     && string.IsNullOrWhiteSpace(h.PrimaryDecedent.AwardList[i]))
                 {
-                    h.PrimaryDecedent.AwardList[i] = value;
+                    h.PrimaryDecedent.AwardList[i] = value.Trim('\r');
                     updateDB = true;
                 }
             }
             if (tmpData.TryGetValue("Awards_Custom", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.AwardCustom))
             {
-                h.PrimaryDecedent.AwardCustom = value;
+                h.PrimaryDecedent.AwardCustom = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("Inscription", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.Inscription))
             {
-                h.PrimaryDecedent.Inscription = value;
+                h.PrimaryDecedent.Inscription = value.Trim('\r');
                 updateDB = true;
             }
             // Secondary 
             if (tmpData.TryGetValue("First Name Spouse/Dependent", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].FirstName))
             {
-                h.OthersDecedentList[0].FirstName = value;
+                h.OthersDecedentList[0].FirstName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("Middle Name Spouse/Dependent", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].MiddleName))
             {
-                h.OthersDecedentList[0].MiddleName = value;
+                h.OthersDecedentList[0].MiddleName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("Last Name Spouse/Dependent", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].LastName))
             {
-                h.OthersDecedentList[0].LastName = value;
+                h.OthersDecedentList[0].LastName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("Suffix Spouse/Dependent", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].Suffix))
             {
-                h.OthersDecedentList[0].Suffix = value;
+                h.OthersDecedentList[0].Suffix = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LocationS_D", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].Location))
             {
-                h.OthersDecedentList[0].Location = value;
+                h.OthersDecedentList[0].Location = value.Trim('\r');
                 updateDB = true;
             }
             List<string> RankSD = new List<string>() { "RankS_D", "Rank2S_D", "Rank3S_D" };
@@ -364,7 +372,7 @@ namespace Services
                 if (tmpData.TryGetValue(RankSD[i], out value)
                     && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].RankList[i]))
                 {
-                    h.OthersDecedentList[0].RankList[i] = value;
+                    h.OthersDecedentList[0].RankList[i] = value.Trim('\r');
                     updateDB = true;
                 }
             }
@@ -374,14 +382,14 @@ namespace Services
                 if (tmpData.TryGetValue(BranchSD[i], out value)
                     && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].BranchList[i]))
                 {
-                    h.OthersDecedentList[0].BranchList[i] = value;
+                    h.OthersDecedentList[0].BranchList[i] = value.Trim('\r');
                     updateDB = true;
                 }
             }
             if (tmpData.TryGetValue("Branch-Unit_CustomS_D", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].BranchUnitCustom))
             {
-                h.OthersDecedentList[0].BranchUnitCustom = value;
+                h.OthersDecedentList[0].BranchUnitCustom = value.Trim('\r');
                 updateDB = true;
             }
             List<string> WarSD = new List<string>() { "WarS_D", "War2S_D", "War3S_D", "War4S_D" };
@@ -390,20 +398,20 @@ namespace Services
                 if (tmpData.TryGetValue(WarSD[i], out value)
                     && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].WarList[i]))
                 {
-                    h.OthersDecedentList[0].WarList[i] = value;
+                    h.OthersDecedentList[0].WarList[i] = value.Trim('\r');
                     updateDB = true;
                 }
             }
             if (tmpData.TryGetValue("BirthDateS_D", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].BirthDate))
             {
-                h.OthersDecedentList[0].BirthDate = value;
+                h.OthersDecedentList[0].BirthDate = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("DeathDateS_D", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].DeathDate))
             {
-                h.OthersDecedentList[0].DeathDate = value;
+                h.OthersDecedentList[0].DeathDate = value.Trim('\r');
                 updateDB = true;
             }
             List<string> AwardSD = new List<string>() { "AwardS_D", "Award2S_D", "Award3S_D", "Award4S_D", "Award5S_D", "Award6S_D", "Award7S_D" };
@@ -412,325 +420,325 @@ namespace Services
                 if (tmpData.TryGetValue(AwardSD[i], out value)
                     && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].AwardList[i]))
                 {
-                    h.OthersDecedentList[0].AwardList[i] = value;
+                    h.OthersDecedentList[0].AwardList[i] = value.Trim('\r');
                     updateDB = true;
                 }
             }
             if (tmpData.TryGetValue("Awards_CustomS_D", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].AwardCustom))
             {
-                h.OthersDecedentList[0].AwardCustom = value;
+                h.OthersDecedentList[0].AwardCustom = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("InscriptionS_D", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].Inscription))
             {
-                h.OthersDecedentList[0].Inscription = value;
+                h.OthersDecedentList[0].Inscription = value.Trim('\r');
                 updateDB = true;
             }
             // Third
             if (tmpData.TryGetValue("FirstNameS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].FirstName))
             {
-                h.OthersDecedentList[1].FirstName = value;
+                h.OthersDecedentList[1].FirstName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("MiddleNameS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].MiddleName))
             {
-                h.OthersDecedentList[1].MiddleName = value;
+                h.OthersDecedentList[1].MiddleName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LastNameS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].LastName))
             {
-                h.OthersDecedentList[1].LastName = value;
+                h.OthersDecedentList[1].LastName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("SuffixS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].Suffix))
             {
-                h.OthersDecedentList[1].Suffix = value;
+                h.OthersDecedentList[1].Suffix = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LocationS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].Location))
             {
-                h.OthersDecedentList[1].Location = value;
+                h.OthersDecedentList[1].Location = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("RankS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].RankList[0]))
             {
-                h.OthersDecedentList[1].RankList[0] = value;
+                h.OthersDecedentList[1].RankList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("BranchS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].BranchList[0]))
             {
-                h.OthersDecedentList[1].BranchList[0] = value;
+                h.OthersDecedentList[1].BranchList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("WarS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].WarList[0]))
             {
-                h.OthersDecedentList[1].WarList[0] = value;
+                h.OthersDecedentList[1].WarList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("BirthDateS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].BirthDate))
             {
-                h.OthersDecedentList[1].BirthDate = value;
+                h.OthersDecedentList[1].BirthDate = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("DeathDateS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].DeathDate))
             {
-                h.OthersDecedentList[1].DeathDate = value;
+                h.OthersDecedentList[1].DeathDate = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("AwardS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].AwardList[0]))
             {
-                h.OthersDecedentList[1].AwardList[0] = value;
+                h.OthersDecedentList[1].AwardList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("InscriptionS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].Inscription))
             {
-                h.OthersDecedentList[1].Inscription = value;
+                h.OthersDecedentList[1].Inscription = value.Trim('\r');
                 updateDB = true;
             }
             // Fourth
             if (tmpData.TryGetValue("FirstNameS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].FirstName))
             {
-                h.OthersDecedentList[2].FirstName = value;
+                h.OthersDecedentList[2].FirstName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("MiddleNameS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].MiddleName))
             {
-                h.OthersDecedentList[2].MiddleName = value;
+                h.OthersDecedentList[2].MiddleName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LastNameS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].LastName))
             {
-                h.OthersDecedentList[2].LastName = value;
+                h.OthersDecedentList[2].LastName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("SuffixS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].Suffix))
             {
-                h.OthersDecedentList[2].Suffix = value;
+                h.OthersDecedentList[2].Suffix = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LocationS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].Location))
             {
-                h.OthersDecedentList[2].Location = value;
+                h.OthersDecedentList[2].Location = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("RankS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].RankList[0]))
             {
-                h.OthersDecedentList[2].RankList[0] = value;
+                h.OthersDecedentList[2].RankList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("BranchS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].BranchList[0]))
             {
-                h.OthersDecedentList[2].BranchList[0] = value;
+                h.OthersDecedentList[2].BranchList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("WarS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].WarList[0]))
             {
-                h.OthersDecedentList[2].WarList[0] = value;
+                h.OthersDecedentList[2].WarList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("BirthDateS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].BirthDate))
             {
-                h.OthersDecedentList[2].BirthDate = value;
+                h.OthersDecedentList[2].BirthDate = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("DeathDateS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].DeathDate))
             {
-                h.OthersDecedentList[2].DeathDate = value;
+                h.OthersDecedentList[2].DeathDate = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("AwardS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].AwardList[0]))
             {
-                h.OthersDecedentList[2].AwardList[0] = value;
+                h.OthersDecedentList[2].AwardList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("InscriptionS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].Inscription))
             {
-                h.OthersDecedentList[2].Inscription = value;
+                h.OthersDecedentList[2].Inscription = value.Trim('\r');
                 updateDB = true;
             }
             // Fifth
             if (tmpData.TryGetValue("FirstNameS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].FirstName))
             {
-                h.OthersDecedentList[3].FirstName = value;
+                h.OthersDecedentList[3].FirstName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("MiddleNameS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].MiddleName))
             {
-                h.OthersDecedentList[3].MiddleName = value;
+                h.OthersDecedentList[3].MiddleName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LastNameS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].LastName))
             {
-                h.OthersDecedentList[3].LastName = value;
+                h.OthersDecedentList[3].LastName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("SuffixS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].Suffix))
             {
-                h.OthersDecedentList[3].Suffix = value;
+                h.OthersDecedentList[3].Suffix = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LocationS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].Location))
             {
-                h.OthersDecedentList[3].Location = value;
+                h.OthersDecedentList[3].Location = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("RankS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].RankList[0]))
             {
-                h.OthersDecedentList[3].RankList[0] = value;
+                h.OthersDecedentList[3].RankList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("BranchS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].BranchList[0]))
             {
-                h.OthersDecedentList[3].BranchList[0] = value;
+                h.OthersDecedentList[3].BranchList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("WarS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].WarList[0]))
             {
-                h.OthersDecedentList[3].WarList[0] = value;
+                h.OthersDecedentList[3].WarList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("BirthDateS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].BirthDate))
             {
-                h.OthersDecedentList[3].BirthDate = value;
+                h.OthersDecedentList[3].BirthDate = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("DeathDateS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].DeathDate))
             {
-                h.OthersDecedentList[3].DeathDate = value;
+                h.OthersDecedentList[3].DeathDate = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("AwardS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].AwardList[0]))
             {
-                h.OthersDecedentList[3].AwardList[0] = value;
+                h.OthersDecedentList[3].AwardList[0] = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("InscriptionS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].Inscription))
             {
-                h.OthersDecedentList[3].Inscription = value;
+                h.OthersDecedentList[3].Inscription = value.Trim('\r');
                 updateDB = true;
             }
             // Sixth
             if (tmpData.TryGetValue("FirstNameS_D_5", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[4].FirstName))
             {
-                h.OthersDecedentList[4].FirstName = value;
+                h.OthersDecedentList[4].FirstName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("MiddleNameS_D_5", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[4].MiddleName))
             {
-                h.OthersDecedentList[4].MiddleName = value;
+                h.OthersDecedentList[4].MiddleName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LastNameS_D_5", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[4].LastName))
             {
-                h.OthersDecedentList[4].LastName = value;
+                h.OthersDecedentList[4].LastName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("SuffixS_D_5", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[4].Suffix))
             {
-                h.OthersDecedentList[4].Suffix = value;
+                h.OthersDecedentList[4].Suffix = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LocationS_D_5", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[4].Location))
             {
-                h.OthersDecedentList[4].Location = value;
+                h.OthersDecedentList[4].Location = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("BirthDateS_D_5", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[4].BirthDate))
             {
-                h.OthersDecedentList[4].BirthDate = value;
+                h.OthersDecedentList[4].BirthDate = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("DeathDateS_D_5", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[4].DeathDate))
             {
-                h.OthersDecedentList[4].DeathDate = value;
+                h.OthersDecedentList[4].DeathDate = value.Trim('\r');
                 updateDB = true;
             }
             // Seventh
             if (tmpData.TryGetValue("FirstNameS_D_6", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[5].FirstName))
             {
-                h.OthersDecedentList[5].FirstName = value;
+                h.OthersDecedentList[5].FirstName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("MiddleNameS_D_6", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[5].MiddleName))
             {
-                h.OthersDecedentList[5].MiddleName = value;
+                h.OthersDecedentList[5].MiddleName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LastNameS_D_6", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[5].LastName))
             {
-                h.OthersDecedentList[5].LastName = value;
+                h.OthersDecedentList[5].LastName = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("SuffixS_D_6", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[5].Suffix))
             {
-                h.OthersDecedentList[5].Suffix = value;
+                h.OthersDecedentList[5].Suffix = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("LocationS_D_6", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[5].Location))
             {
-                h.OthersDecedentList[5].Location = value;
+                h.OthersDecedentList[5].Location = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("BirthDateS_D_6", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[5].BirthDate))
             {
-                h.OthersDecedentList[5].BirthDate = value;
+                h.OthersDecedentList[5].BirthDate = value.Trim('\r');
                 updateDB = true;
             }
             if (tmpData.TryGetValue("DeathDateS_D_6", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[5].DeathDate))
             {
-                h.OthersDecedentList[5].DeathDate = value;
+                h.OthersDecedentList[5].DeathDate = value.Trim('\r');
                 updateDB = true;
             }
 
