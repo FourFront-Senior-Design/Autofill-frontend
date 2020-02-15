@@ -54,6 +54,24 @@ namespace Services
             return true;
         }
 
+        public void CreateRecordTypeFile()
+        {
+            StreamWriter writer = new StreamWriter(SectionFilePath + "\\recordTypeList.tmp");
+
+            for (int i = 1; i < TotalItems + 1; i++)
+            {
+                Headstone headstone = GetHeadstone(i);
+                writer.Write(headstone.SequenceID + " ");
+
+                if (string.IsNullOrWhiteSpace(headstone.Image2FileName))
+                    writer.Write("1\n");
+                else
+                    writer.Write("2\n");
+            }
+
+            writer.Close();
+        }
+
         private void GetAccessFilePath()
         {
 
