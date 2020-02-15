@@ -5,6 +5,8 @@ namespace DataStructures
     public class Headstone
     {
         public Dictionary<string, string> fields;
+        public string branchCustom;
+        public string branchCustomS_D;
 
         public Headstone()
         {

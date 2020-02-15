@@ -67,6 +67,14 @@ namespace Services
 
                 // Update the database
                 _database.SetHeadstone(i, currentHeadstone);
+
+                foreach (string key in currentHeadstone.fields.Keys)
+                {
+                    if (!tmpData.ContainsKey(key))
+                    {
+                        Trace.WriteLine(key);
+                    }
+                }
             }
 
             // delete tempFiles directory
@@ -87,7 +95,15 @@ namespace Services
         {
             foreach (string key in tempData.Keys)
             {
-                currentHeadstone.fields[key] = tempData[key];
+                // Handle the odd cases of Branch Unit Custom
+                if (key == "Branch-Unit_CustomV")
+                    currentHeadstone.branchCustom = tempData[key];
+                else if (key == "Branch-Unit_CustomS_D")
+                    currentHeadstone.branchCustomS_D = tempData[key];
+                else if (String.IsNullOrEmpty(currentHeadstone.fields[key]))
+                {
+                    currentHeadstone.fields[key] = tempData[key];
+                }
             }
         }
 
