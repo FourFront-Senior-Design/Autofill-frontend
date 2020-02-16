@@ -87,6 +87,7 @@ namespace Services
             {
                 string tempFilesPath = _database.SectionFilePath + "\\tempFiles\\";
                 Directory.Delete(tempFilesPath, true);
+                File.Delete(_database.SectionFilePath + "\\recordTypeList.tmp");
             }
 
             // write totalFlats and totalUprights to file "MarkerTypeSummary.txt"

@@ -61,12 +61,10 @@ namespace Services
             for (int i = 1; i < TotalItems + 1; i++)
             {
                 Headstone headstone = GetHeadstone(i);
-                writer.Write(headstone.SequenceID + " ");
+                writer.Write(headstone.SequenceID);
 
-                if (string.IsNullOrWhiteSpace(headstone.Image2FileName))
-                    writer.Write("1\n");
-                else
-                    writer.Write("2\n");
+                if (!string.IsNullOrWhiteSpace(headstone.Image2FileName))
+                    writer.Write(" " + headstone.Image2FileName + "\n");
             }
 
             writer.Close();
