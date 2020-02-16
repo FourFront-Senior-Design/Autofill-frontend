@@ -61,10 +61,17 @@ namespace Services
             for (int i = 1; i < TotalItems + 1; i++)
             {
                 Headstone headstone = GetHeadstone(i);
-                writer.Write(headstone.SequenceID);
+
+                string imageName1 = headstone.Image1FileName.Split('.')[0];
+
+                writer.Write(imageName1);
 
                 if (!string.IsNullOrWhiteSpace(headstone.Image2FileName))
-                    writer.Write(" " + headstone.Image2FileName + "\n");
+                {
+                    string imageName2 = headstone.Image2FileName.Split('.')[0];
+                    writer.Write(" " + imageName2);
+                }
+                writer.Write("\n");
             }
 
             writer.Close();
@@ -162,7 +169,7 @@ namespace Services
 
                 headstone.OthersDecedentList = GetAddtionalDecedents(dataRow);
 
-                Console.WriteLine((int)MasterTableCols.FrontFilename);
+                //Console.WriteLine((int)MasterTableCols.FrontFilename);
                 headstone.Image1FilePath = dataRow[(int)MasterTableCols.FrontFilename].ToString();
                 headstone.Image2FilePath = dataRow[(int)MasterTableCols.BackFilename].ToString();
 
