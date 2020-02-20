@@ -170,26 +170,34 @@ namespace Services
             // Replace .jpg extension from file name
             path = path.Remove(path.Length - 4, 4);
             path += ".tmp";
-            using (StreamReader streamReader = new StreamReader(path, encoding))
-            {
-                result = streamReader.ReadToEnd();
-            }
-            // Read .tmp file into string - convert to list
-            List<string> tmpList = new List<string>(result.Split('\n'));
 
-            // Set up dictionary of key,value pairs from file
-            foreach (string item in tmpList)
+            try
             {
-                // Add only key,value pairs
-                string[] line = item.Split(':');
-                if (line.Length == 2)
+                using (StreamReader streamReader = new StreamReader(path, encoding))
                 {
-                    dict.Add(line[0], line[1].Trim('\r'));
+                    result = streamReader.ReadToEnd();
                 }
-                else if (line.Length == 1 && !string.IsNullOrEmpty(line[0]))
+                // Read .tmp file into string - convert to list
+                List<string> tmpList = new List<string>(result.Split('\n'));
+
+                // Set up dictionary of key,value pairs from file
+                foreach (string item in tmpList)
                 {
-                    dict.Add(line[0], null);
+                    // Add only key,value pairs
+                    string[] line = item.Split(':');
+                    if (line.Length == 2)
+                    {
+                        dict.Add(line[0], line[1].Trim('\r'));
+                    }
+                    else if (line.Length == 1 && !string.IsNullOrEmpty(line[0]))
+                    {
+                        dict.Add(line[0], null);
+                    }
                 }
+            }
+            catch (FileNotFoundException e)
+            {
+                Trace.WriteLine(path + " not found.");
             }
 
             return dict;
