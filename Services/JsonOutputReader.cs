@@ -97,7 +97,7 @@ namespace Services
             writer.Close();
         }
 
-        private Dictionary<string, string> ReadTmpFile(string filename)
+        public Dictionary<string, string> ReadTmpFile(string filename)
         {
             // Private internal function to read file into Dictionary
             Dictionary<string, string> dict = new Dictionary<string, string>();
@@ -134,7 +134,7 @@ namespace Services
             return dict;
         }
 
-        private bool UpdateHeadstone(ref Headstone h, Dictionary<string, string> tmpData)
+        public bool UpdateHeadstone(ref Headstone h, Dictionary<string, string> tmpData)
         {
             // Write data to the Headstone - no overwrite of existing data
             // NOTE: This code needs to be refactored for multiple reasons:
