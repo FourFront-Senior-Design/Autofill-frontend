@@ -3,4 +3,11 @@ obj/
 Debug/
 Release/
 .vs/
-/TestDatabases/
+TestDatabases/Section0000P_UprightMakerTypes/ReferencedImages/
+TestDatabases/Section0000P_UprightMakerTypes/GoogleVisionData/
+TestDatabases/Section0000P_UprightMakerTypes/tempFiles/
+TestDatabases/Section0000P_UprightMakerTypes/*.accdb
+TestDatabases/SectionC-10_FlatMarkerTypes/ReferencedImages/
+TestDatabases/SectionC-10_FlatMarkerTypes/GoogleVisionData/
+TestDatabases/SectionC-10_FlatMarkerTypes/tempFiles/
+TestDatabases/SectionC-10_FlatMarkerTypes/*.accdb

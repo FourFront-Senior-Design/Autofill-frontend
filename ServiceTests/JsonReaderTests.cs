@@ -155,7 +155,7 @@ namespace ServiceTests
             JsonOutputReader reader = new JsonOutputReader(dataBaseService);
 
             // Read the temp file
-            Dictionary<string, string> result = reader.ReadTmpFile(sectionPath + "\\tempFiles\\test1.tmp");
+            Dictionary<string, string> result = reader.ReadTmpFile(sectionPath + "\\testTempFiles\\test1.tmp");
 
             // Assert that the output is correct
             Assert.IsTrue(expected.Count == result.Count);
@@ -185,7 +185,7 @@ namespace ServiceTests
             JsonOutputReader reader = new JsonOutputReader(dataBaseService);
 
             // Read the temp file
-            Dictionary<string, string> result = reader.ReadTmpFile(sectionPath + "\\tempFiles\\test1.tmp");
+            Dictionary<string, string> result = reader.ReadTmpFile(sectionPath + "\\testTempFiles\\test1.tmp");
 
             // Assert that the values are correct
             foreach (string key in result.Keys)
@@ -217,7 +217,7 @@ namespace ServiceTests
             JsonOutputReader reader = new JsonOutputReader(dataBaseService);
 
             // Read the temp file
-            Dictionary<string, string> result = reader.ReadTmpFile(sectionPath + "\\tempFiles\\test1.tmp");
+            Dictionary<string, string> result = reader.ReadTmpFile(sectionPath + "\\testTempFiles\\test1.tmp");
 
             Headstone tempHeadstone = testHeadstone;
 
