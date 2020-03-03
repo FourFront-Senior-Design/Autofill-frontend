@@ -16,7 +16,7 @@ namespace Services
         private List<List<string>> _allKeys = new List<List<string>>();
         private int _missedRecords = 0;
 
-        private bool _DeleteTempFilesDirectory = false;
+        private bool _DeleteTempFilesDirectory = true;
 
         public JsonOutputReader(IDatabaseService database)
         {
