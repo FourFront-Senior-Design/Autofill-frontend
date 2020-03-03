@@ -62,8 +62,16 @@ namespace DatabaseAutofillSoftware
                 _viewModel.Message = "Database loaded successfully. Autofill scripts are running...";
                 _database.CreateRecordTypeFile();
                 _autofillService.runScripts(_viewModel.FileLocation);
-                _outputReader.FillDatabase();
-                _viewModel.Message = "Database autofilled successfully.";
+                int missedRecordsCount = _outputReader.FillDatabase();
+
+                if (missedRecordsCount > 0)
+                {
+                    _viewModel.Message = "Missed " + missedRecordsCount + " records, please retry this section.";
+                }
+                else
+                {
+                    _viewModel.Message = "Database autofilled successfully.";
+                }
             }
 
             sectionPath.Focus();

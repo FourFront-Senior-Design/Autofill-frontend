@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
+using System;
 
 namespace Services
 {
@@ -13,8 +14,9 @@ namespace Services
         private IDatabaseService _database;
         private JsonKeys _jsonKeys;
         private List<List<string>> _allKeys = new List<List<string>>();
+        private int _missedRecords = 0;
 
-        private bool _DeleteTempFilesDirectory = true;
+        private bool _DeleteTempFilesDirectory = false;
 
         public JsonOutputReader(IDatabaseService database)
         {
@@ -33,7 +35,7 @@ namespace Services
             _allKeys.Add(_jsonKeys.SeventhKeys);
         }
 
-        public void FillDatabase()
+        public int FillDatabase()
         {
             // Autofill marker type and other data from .tmp files
             Headstone currentHeadstone;
@@ -95,6 +97,8 @@ namespace Services
             writer.Write("Uprights: " + totalUprights.ToString());
             writer.Write("\nFlats: " +  totalFlats.ToString());
             writer.Close();
+
+            return _missedRecords;
         }
 
         public Dictionary<string, string> ReadTmpFile(string filename)
@@ -109,26 +113,33 @@ namespace Services
             // Replace .jpg extension from file name
             path = path.Remove(path.Length - 4, 4);
             path += ".tmp";
-            using (StreamReader streamReader = new StreamReader(path, encoding))
+            try
             {
-                result = streamReader.ReadToEnd();
-            }
-            // Read .tmp file into string - convert to list
-            List<string> tmpList = new List<string>(result.Split('\n'));
+                using (StreamReader streamReader = new StreamReader(path, encoding))
+                {
+                    result = streamReader.ReadToEnd();
 
-            // Set up dictionary of key,value pairs from file
-            foreach (string item in tmpList)
+                    // Read .tmp file into string - convert to list
+                    List<string> tmpList = new List<string>(result.Split('\n'));
+
+                    // Set up dictionary of key,value pairs from file
+                    foreach (string item in tmpList)
+                    {
+                        // Add only key,value pairs
+                        string[] line = item.Split(':');
+                        if (line.Length == 2)
+                        {
+                            dict.Add(line[0], line[1].Trim('\r'));
+                        }
+                        else if (line.Length == 1 && !string.IsNullOrEmpty(line[0]))
+                        {
+                            dict.Add(line[0], null);
+                        }
+                    }
+                }
+            } catch
             {
-                // Add only key,value pairs
-                string[] line = item.Split(':');
-                if (line.Length == 2)
-                {
-                    dict.Add(line[0], line[1].Trim('\r'));
-                }
-                else if (line.Length == 1 && !string.IsNullOrEmpty(line[0]))
-                {
-                    dict.Add(line[0], null);
-                }
+                _missedRecords++;
             }
 
             return dict;
