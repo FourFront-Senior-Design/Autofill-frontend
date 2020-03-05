@@ -1,6 +1,7 @@
 ﻿using ViewModelInterfaces;
 using System.Windows;
 using ServicesInterface;
+using System.Collections.Generic;
 
 namespace DatabaseAutofillSoftware
 {
@@ -59,9 +60,18 @@ namespace DatabaseAutofillSoftware
                 Properties.Settings.Default.Save();
 
                 _viewModel.Message = "Database loaded successfully. Autofill scripts are running...";
+                _database.CreateRecordTypeFile();
                 _autofillService.runScripts(_viewModel.FileLocation);
-                _outputReader.FillDatabase();
-                _viewModel.Message = "Database autofilled successfully.";
+                int missedRecordsCount = _outputReader.FillDatabase();
+
+                if (missedRecordsCount > 0)
+                {
+                    _viewModel.Message = "Missed " + missedRecordsCount + " records, please retry this section.";
+                }
+                else
+                {
+                    _viewModel.Message = "Database autofilled successfully.";
+                }
             }
 
             sectionPath.Focus();

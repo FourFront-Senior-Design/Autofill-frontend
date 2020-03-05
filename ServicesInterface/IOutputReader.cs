@@ -1,7 +1,9 @@
-﻿namespace ServicesInterface
+﻿using System.Collections.Generic;
+
+namespace ServicesInterface
 {
     public interface IOutputReader
     {
-        void FillDatabase();
+        int FillDatabase();
     }
 }

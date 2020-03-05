@@ -11,6 +11,8 @@ namespace ServicesInterface
 
         bool InitDBConnection(string sectionFilePath);
 
+        void CreateRecordTypeFile();
+
         int TotalItems { get; }
 
         List<CemeteryNameData> CemeteryNames { get; }
