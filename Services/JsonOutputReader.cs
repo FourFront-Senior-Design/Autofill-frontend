@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
+using System;
 
 namespace Services
 {
@@ -13,6 +14,7 @@ namespace Services
         private IDatabaseService _database;
         private JsonKeys _jsonKeys;
         private List<List<string>> _allKeys = new List<List<string>>();
+        private int _missedRecords = 0;
 
         private bool _DeleteTempFilesDirectory = true;
 
@@ -33,7 +35,7 @@ namespace Services
             _allKeys.Add(_jsonKeys.SeventhKeys);
         }
 
-        public void FillDatabase()
+        public int FillDatabase()
         {
             // Autofill marker type and other data from .tmp files
             Headstone currentHeadstone;
@@ -59,13 +61,9 @@ namespace Services
                     totalFlats++;
                     if (string.IsNullOrWhiteSpace(currentHeadstone.MarkerType))
                     {
-                        updateDB = true;
                         currentHeadstone.MarkerType = "Flat Marker";
+                        updateDB = true;
                     }
-
-                    // Read single .tmp file for flat markers
-                    Dictionary<string, string> tmpData = ReadTmpFile(currentHeadstone.Image1FileName);
-                    updateDB = UpdateHeadstone(ref currentHeadstone, tmpData);
                 }
                 else
                 {
@@ -73,82 +71,25 @@ namespace Services
                     totalUprights++;
                     if (string.IsNullOrWhiteSpace(currentHeadstone.MarkerType))
                     {
-                        updateDB = true;
                         currentHeadstone.MarkerType = "Upright Headstone";
+                        updateDB = true;
                     }
-
-                    // Read both .tmp files for upright headstones
-                    Dictionary<string, string> front = ReadTmpFile(currentHeadstone.Image1FileName);
-                    Dictionary<string, string> back = ReadTmpFile(currentHeadstone.Image2FileName);
-                    int numToMerge = 0;
-                    int maxTotalDecedents = 7;
-
-                    // Find last filled decedent position on front of stone
-                    int lastFilledFront = FindLastFilledPosition(front, maxTotalDecedents);
-                    // Find last filled decedent position on back of stone
-                    int lastFilledBack = FindLastFilledPosition(back, maxTotalDecedents);
-
-                    // Calculate the number of decedents to merge from back to front
-                    if (lastFilledBack + lastFilledFront > maxTotalDecedents)
-                    {
-                        numToMerge = maxTotalDecedents - lastFilledFront;
-                    }
-                    else
-                    {
-                        numToMerge = lastFilledBack;
-                    }
-
-                    // TODO(jd): Put this into a separate function
-                    int nextPosition = lastFilledFront + 1;
-                    // need to merge into front starting at nextPosition
-                    int backPosition = 1;
-                    while (numToMerge > 0)
-                    {
-                        foreach (KeyValuePair<string, string> item in back)
-                        {
-                            // Only move keys at current backPosition
-                            // TODO(jd): check that key also exists in nextPosition on front
-                            if (_allKeys[backPosition].Contains(item.Key))
-                            {
-                                // Verify key has a value
-                                // TODO(jd): Currently only dates are handled
-                                // TODO(jd): Need to handle more fields here
-                                if (!string.IsNullOrWhiteSpace(item.Value))
-                                {
-                                    if (_jsonKeys.BirthDateKeys.Contains(item.Key))
-                                    {
-                                        front[_jsonKeys.BirthDateKeys[nextPosition]] = item.Value.Trim('\r');
-                                    }
-                                    if (_jsonKeys.DeathDateKeys.Contains(item.Key))
-                                    {
-                                        front[_jsonKeys.DeathDateKeys[nextPosition]] = item.Value.Trim('\r');
-                                    }
-                                }
-                            }
-                        }
-                        nextPosition++;
-                        backPosition++;
-                        numToMerge--;
-                    }
-
-                    // update headstone with combined data
-                    updateDB = UpdateHeadstone(ref currentHeadstone, front);
                 }
+
+                Dictionary<string, string> tmpData = ReadTmpFile(currentHeadstone.Image1FileName);
+                updateDB = UpdateHeadstone(ref currentHeadstone, tmpData);
 
                 if (updateDB)
                 {
                     _database.SetHeadstone(i, currentHeadstone);
-                    // Debug info
-                    //Trace.WriteLine(currentHeadstone.PrimaryDecedent.BirthDate);
-                    //Trace.WriteLine(currentHeadstone.PrimaryDecedent.DeathDate);
-                    //Trace.WriteLine("Record " + i + " processed.");
                 }
             }
             // delete tempFiles directory
             if (_DeleteTempFilesDirectory)
             {
                 string tempFilesPath = _database.SectionFilePath + "\\tempFiles\\";
-                System.IO.Directory.Delete(tempFilesPath, true);
+                Directory.Delete(tempFilesPath, true);
+                File.Delete(_database.SectionFilePath + "\\recordTypeList.tmp");
             }
 
             // write totalFlats and totalUprights to file "MarkerTypeSummary.txt"
@@ -156,13 +97,15 @@ namespace Services
             writer.Write("Uprights: " + totalUprights.ToString());
             writer.Write("\nFlats: " +  totalFlats.ToString());
             writer.Close();
+
+            return _missedRecords;
         }
 
-        private Dictionary<string, string> ReadTmpFile(string filename)
+        public Dictionary<string, string> ReadTmpFile(string filename)
         {
             // Private internal function to read file into Dictionary
             Dictionary<string, string> dict = new Dictionary<string, string>();
-            Encoding encoding = System.Text.Encoding.UTF8;
+            Encoding encoding = Encoding.UTF8;
             string result;
 
             // Set up filename
@@ -170,80 +113,40 @@ namespace Services
             // Replace .jpg extension from file name
             path = path.Remove(path.Length - 4, 4);
             path += ".tmp";
-
+            
             try
             {
                 using (StreamReader streamReader = new StreamReader(path, encoding))
                 {
                     result = streamReader.ReadToEnd();
-                }
-                // Read .tmp file into string - convert to list
-                List<string> tmpList = new List<string>(result.Split('\n'));
 
-                // Set up dictionary of key,value pairs from file
-                foreach (string item in tmpList)
-                {
-                    // Add only key,value pairs
-                    string[] line = item.Split(':');
-                    if (line.Length == 2)
+                    // Read .tmp file into string - convert to list
+                    List<string> tmpList = new List<string>(result.Split('\n'));
+
+                    // Set up dictionary of key,value pairs from file
+                    foreach (string item in tmpList)
                     {
-                        dict.Add(line[0], line[1].Trim('\r'));
-                    }
-                    else if (line.Length == 1 && !string.IsNullOrEmpty(line[0]))
-                    {
-                        dict.Add(line[0], null);
+                        // Add only key,value pairs
+                        string[] line = item.Split(':');
+                        if (line.Length == 2)
+                        {
+                            dict.Add(line[0], line[1].Trim('\r'));
+                        }
+                        else if (line.Length == 1 && !string.IsNullOrEmpty(line[0]))
+                        {
+                            dict.Add(line[0], null);
+                        }
                     }
                 }
-            }
-            catch (FileNotFoundException e)
+            } catch
             {
-                Trace.WriteLine(path + " not found.");
+                _missedRecords++;
             }
 
             return dict;
         }
-        
-        private int FindLastFilledPosition(Dictionary<string, string> dict, int maxTotalDecedents)
-        {
-            int lastFilledPosition = 0;
-            foreach (KeyValuePair<string, string> item in dict)
-            {
-                if (!string.IsNullOrWhiteSpace(item.Value))
-                {
-                    if (_jsonKeys.PrimaryKeys.Contains(item.Key))
-                    {
-                        lastFilledPosition = 1;
-                    }
-                    else if (_jsonKeys.SecondKeys.Contains(item.Key))
-                    {
-                        lastFilledPosition = 2;
-                    }
-                    else if (_jsonKeys.ThirdKeys.Contains(item.Key))
-                    {
-                        lastFilledPosition = 3;
-                    }
-                    else if (_jsonKeys.FourthKeys.Contains(item.Key))
-                    {
-                        lastFilledPosition = 4;
-                    }
-                    else if (_jsonKeys.FifthKeys.Contains(item.Key))
-                    {
-                        lastFilledPosition = 5;
-                    }
-                    else if (_jsonKeys.SixthKeys.Contains(item.Key))
-                    {
-                        lastFilledPosition = 6;
-                    }
-                    else if (_jsonKeys.SeventhKeys.Contains(item.Key))
-                    {
-                        lastFilledPosition = maxTotalDecedents;
-                    }
-                }
-            }
-            return lastFilledPosition;
-        }
 
-        private bool UpdateHeadstone(ref Headstone h, Dictionary<string, string> tmpData)
+        public bool UpdateHeadstone(ref Headstone h, Dictionary<string, string> tmpData)
         {
             // Write data to the Headstone - no overwrite of existing data
             // NOTE: This code needs to be refactored for multiple reasons:
