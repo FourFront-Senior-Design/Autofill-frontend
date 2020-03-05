@@ -18,8 +18,8 @@ namespace Services
             start.UseShellExecute = false;
             start.CreateNoWindow = true;
 
-            Trace.WriteLine(start.FileName);
-            Trace.WriteLine(start.Arguments);
+            //Trace.WriteLine(start.FileName);
+            //Trace.WriteLine(start.Arguments);
 
             using (Process process = new Process())
             {

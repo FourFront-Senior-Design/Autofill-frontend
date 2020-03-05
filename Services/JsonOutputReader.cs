@@ -113,6 +113,7 @@ namespace Services
             // Replace .jpg extension from file name
             path = path.Remove(path.Length - 4, 4);
             path += ".tmp";
+            
             try
             {
                 using (StreamReader streamReader = new StreamReader(path, encoding))
