@@ -78,7 +78,7 @@ namespace DatabaseAutofillSoftware
 
             (sender as BackgroundWorker).ReportProgress(75);
 
-            _viewModel.SetMessage("Autofill scripts are running...");
+            _viewModel.SetMessage("Autofill scripts running...");
 
             int missedRecordsCount = _outputReader.FillDatabase();
 
