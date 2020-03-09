@@ -4,12 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" Icon="autofillprogramicon.ico"
-        Title="Database Auto-fill Software" Height="450" Width="800" Background="#FFE4E4E4">
+        Title="{Binding Title}" Height="450" Width="800" Background="#FFE4E4E4">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.2*"/>
+            <RowDefinition Height="0.1*"/>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
+            <RowDefinition Height="0.85*"/>
+            <RowDefinition Height="0.15*"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="1">
@@ -77,6 +78,7 @@
                     Margin="10"
                     Click="ExitClick" />
             </StackPanel>
+
             <Label
                 Content="{Binding Message}"
                 Foreground="Red"
@@ -84,6 +86,17 @@
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center"/>
 
+            <ProgressBar x:Name="autofillProgress" Minimum="0" Maximum="100"
+                         HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                         Height="30" Width="500" BorderThickness="2" Margin="0,0,0,30"
+                         IsIndeterminate="False">
+            </ProgressBar>
+            <!--<TextBlock Text="{Binding ElementName=autofillProgress, Path=Value,
+                StringFormat={}{0:0}%}"
+                       HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,30" />-->
+        </Grid>
+
+        <Grid Grid.Row="3">
             <Label
                 Content="{Binding Copyright, Mode=OneWay}"                
                 FontSize="12"

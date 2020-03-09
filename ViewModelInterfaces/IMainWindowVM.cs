@@ -5,6 +5,10 @@
         string FileLocation { get; set; }
         string Message { get; set; }
         string Copyright { get; }
-        int LoadData();
+        string Title { get; }
+
+        void SetFilePath(string path);
+        void SetMessage(string message);
+        bool LoadData();
     }
 }
