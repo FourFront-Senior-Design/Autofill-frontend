@@ -1,5 +1,7 @@
 ﻿using ViewModelInterfaces;
 using System.Windows;
+using System.ComponentModel;
+using System.Threading;
 using ServicesInterface;
 using System.Collections.Generic;
 
@@ -45,6 +47,7 @@ namespace DatabaseAutofillSoftware
 
         private void AutofillClick(object sender, RoutedEventArgs e)
         {
+            autofillProgress.Value = 0;
             int countData = _viewModel.LoadData();
             if (countData == -1)
             {
