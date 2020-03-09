@@ -27,6 +27,8 @@ namespace DatabaseAutofillSoftware
 
             sectionPath.Focus();
             sectionPath.Select(_viewModel.FileLocation.Length, 0);
+
+            autofillProgress.Visibility = Visibility.Collapsed;
         }
 
         private void BrowseClick(object sender, RoutedEventArgs e)
@@ -47,7 +49,6 @@ namespace DatabaseAutofillSoftware
 
         private void AutofillClick(object sender, RoutedEventArgs e)
         {
-            autofillProgress.Value = 0;
             int countData = _viewModel.LoadData();
             if (countData == -1)
             {
@@ -59,26 +60,52 @@ namespace DatabaseAutofillSoftware
             }
             else
             {
-                Properties.Settings.Default.databaseFilePath = _viewModel.FileLocation;
-                Properties.Settings.Default.Save();
+                autofillProgress.Visibility = Visibility.Visible;
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                worker.DoWork += worker_DoWork;
+                worker.ProgressChanged += worker_ProgressChanged;
 
-                _viewModel.Message = "Database loaded successfully. Autofill scripts are running...";
-                _database.CreateRecordTypeFile();
-                _autofillService.runScripts(_viewModel.FileLocation);
-                int missedRecordsCount = _outputReader.FillDatabase();
-
-                if (missedRecordsCount > 0)
-                {
-                    _viewModel.Message = "Missed " + missedRecordsCount + " records, please retry this section.";
-                }
-                else
-                {
-                    _viewModel.Message = "Database autofilled successfully.";
-                }
+                worker.RunWorkerAsync();
             }
 
             sectionPath.Focus();
             sectionPath.Select(_viewModel.FileLocation.Length, 0);
+        }
+
+        void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            (sender as BackgroundWorker).ReportProgress(1);
+
+            Properties.Settings.Default.databaseFilePath = _viewModel.FileLocation;
+            Properties.Settings.Default.Save();
+
+            _viewModel.Message = "Database loaded successfully. Autofill scripts are running...";
+            _database.CreateRecordTypeFile();
+
+            (sender as BackgroundWorker).ReportProgress(10);
+
+            _autofillService.runScripts(_viewModel.FileLocation);
+
+            (sender as BackgroundWorker).ReportProgress(75);
+
+            int missedRecordsCount = _outputReader.FillDatabase();
+
+            (sender as BackgroundWorker).ReportProgress(100);
+
+            if (missedRecordsCount > 0)
+            {
+                _viewModel.Message = "Missed " + missedRecordsCount + " records, please retry this section.";
+            }
+            else
+            {
+                _viewModel.Message = "Database autofilled successfully.";
+            }
+        }
+
+        void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            autofillProgress.Value = e.ProgressPercentage;
         }
 
         private void OnTextChanged(object sender, RoutedEventArgs e)

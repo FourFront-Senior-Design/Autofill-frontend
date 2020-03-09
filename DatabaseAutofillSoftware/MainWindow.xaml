@@ -9,8 +9,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="0.2*"/>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="0.5*"/>
-            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="0.85*"/>
+            <RowDefinition Height="0.15*"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="1">
@@ -86,16 +86,23 @@
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center"/>
 
+            <ProgressBar x:Name="autofillProgress" Minimum="0" Maximum="100"
+                         HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                         Height="40" Width="500" BorderThickness="2" Margin="0,0,0,20"
+                         IsIndeterminate="False">
+            </ProgressBar>
+            <!--<TextBlock Text="{Binding ElementName=autofillProgress, Path=Value,
+                StringFormat={}{0:0}%}"
+                       HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,30" />-->
+        </Grid>
+
+        <Grid Grid.Row="3">
             <Label
                 Content="{Binding Copyright, Mode=OneWay}"                
                 FontSize="12"
                 VerticalAlignment="Bottom"
                 HorizontalAlignment="Right"
                 />
-        </Grid>
-
-        <Grid Grid.Row="3" Height="40" Width="500" VerticalAlignment="Top">
-            <ProgressBar x:Name="autofillProgress" Minimum="0" Maximum="100" BorderThickness="2"></ProgressBar>
         </Grid>
     </Grid>
 </Window>
