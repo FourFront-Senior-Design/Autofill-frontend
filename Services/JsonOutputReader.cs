@@ -84,6 +84,7 @@ namespace Services
                     _database.SetHeadstone(i, currentHeadstone);
                 }
             }
+
             // delete tempFiles directory
             if (_DeleteTempFilesDirectory)
             {
@@ -153,6 +154,7 @@ namespace Services
             // 1) The access to non-primary decedents is difficult
             // 2) Convert from multiple if statements to a loop if its possible
             //    to iterate through the Headstone fields in order
+
             // Primary  
             bool updateDB = false;
             string value;
@@ -235,7 +237,8 @@ namespace Services
                 h.PrimaryDecedent.DeathDate = value.Trim('\r');
                 updateDB = true;
             }
-            List<string> Awards = new List<string>() { "Award", "Award2", "Award3", "Award4", "Award5", "Award6", "Award7" };
+            List<string> Awards = new List<string>() { "Award", "Award2", "Award3", "Award4",
+                "Award5", "Award6", "Award7" };
             for (int i = 0; i < 7; i++)
             {
                 if (tmpData.TryGetValue(Awards[i], out value)
@@ -257,6 +260,7 @@ namespace Services
                 h.PrimaryDecedent.Inscription = value.Trim('\r');
                 updateDB = true;
             }
+
             // Secondary 
             if (tmpData.TryGetValue("First Name Spouse/Dependent", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].FirstName))
@@ -336,7 +340,8 @@ namespace Services
                 h.OthersDecedentList[0].DeathDate = value.Trim('\r');
                 updateDB = true;
             }
-            List<string> AwardSD = new List<string>() { "AwardS_D", "Award2S_D", "Award3S_D", "Award4S_D", "Award5S_D", "Award6S_D", "Award7S_D" };
+            List<string> AwardSD = new List<string>() { "AwardS_D", "Award2S_D", "Award3S_D",
+                "Award4S_D", "Award5S_D", "Award6S_D", "Award7S_D" };
             for (int i = 0; i < 7; i++)
             {
                 if (tmpData.TryGetValue(AwardSD[i], out value)
@@ -358,6 +363,7 @@ namespace Services
                 h.OthersDecedentList[0].Inscription = value.Trim('\r');
                 updateDB = true;
             }
+
             // Third
             if (tmpData.TryGetValue("FirstNameS_D_2", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[1].FirstName))
@@ -431,6 +437,7 @@ namespace Services
                 h.OthersDecedentList[1].Inscription = value.Trim('\r');
                 updateDB = true;
             }
+
             // Fourth
             if (tmpData.TryGetValue("FirstNameS_D_3", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[2].FirstName))
@@ -504,6 +511,7 @@ namespace Services
                 h.OthersDecedentList[2].Inscription = value.Trim('\r');
                 updateDB = true;
             }
+
             // Fifth
             if (tmpData.TryGetValue("FirstNameS_D_4", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[3].FirstName))
@@ -577,6 +585,7 @@ namespace Services
                 h.OthersDecedentList[3].Inscription = value.Trim('\r');
                 updateDB = true;
             }
+
             // Sixth
             if (tmpData.TryGetValue("FirstNameS_D_5", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[4].FirstName))
@@ -620,6 +629,7 @@ namespace Services
                 h.OthersDecedentList[4].DeathDate = value.Trim('\r');
                 updateDB = true;
             }
+
             // Seventh
             if (tmpData.TryGetValue("FirstNameS_D_6", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[5].FirstName))

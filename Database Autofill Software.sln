@@ -17,9 +17,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Servic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{8873BE41-34CE-48F1-A165-11EC8CEC7998}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "Installer\Installer.vdproj", "{B23F9065-0B02-429B-A674-1AB1E5A3246A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceTests", "ServiceTests\ServiceTests.csproj", "{DCC283A2-325E-49D7-AB0F-E15A2E7FE300}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "Installer\Installer.vdproj", "{787F4FB9-1962-4EF8-9762-AEE1608BAA15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,12 +73,6 @@ Global
 		{8873BE41-34CE-48F1-A165-11EC8CEC7998}.Release|Any CPU.ActiveCfg = Release|x64
 		{8873BE41-34CE-48F1-A165-11EC8CEC7998}.Release|x64.ActiveCfg = Release|x64
 		{8873BE41-34CE-48F1-A165-11EC8CEC7998}.Release|x64.Build.0 = Release|x64
-		{B23F9065-0B02-429B-A674-1AB1E5A3246A}.Debug|Any CPU.ActiveCfg = Debug
-		{B23F9065-0B02-429B-A674-1AB1E5A3246A}.Debug|Any CPU.Build.0 = Debug
-		{B23F9065-0B02-429B-A674-1AB1E5A3246A}.Debug|x64.ActiveCfg = Debug
-		{B23F9065-0B02-429B-A674-1AB1E5A3246A}.Release|Any CPU.ActiveCfg = Release
-		{B23F9065-0B02-429B-A674-1AB1E5A3246A}.Release|Any CPU.Build.0 = Release
-		{B23F9065-0B02-429B-A674-1AB1E5A3246A}.Release|x64.ActiveCfg = Release
 		{DCC283A2-325E-49D7-AB0F-E15A2E7FE300}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DCC283A2-325E-49D7-AB0F-E15A2E7FE300}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCC283A2-325E-49D7-AB0F-E15A2E7FE300}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -87,6 +81,10 @@ Global
 		{DCC283A2-325E-49D7-AB0F-E15A2E7FE300}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DCC283A2-325E-49D7-AB0F-E15A2E7FE300}.Release|x64.ActiveCfg = Release|Any CPU
 		{DCC283A2-325E-49D7-AB0F-E15A2E7FE300}.Release|x64.Build.0 = Release|Any CPU
+		{787F4FB9-1962-4EF8-9762-AEE1608BAA15}.Debug|Any CPU.ActiveCfg = Debug
+		{787F4FB9-1962-4EF8-9762-AEE1608BAA15}.Debug|x64.ActiveCfg = Debug
+		{787F4FB9-1962-4EF8-9762-AEE1608BAA15}.Release|Any CPU.ActiveCfg = Release
+		{787F4FB9-1962-4EF8-9762-AEE1608BAA15}.Release|x64.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

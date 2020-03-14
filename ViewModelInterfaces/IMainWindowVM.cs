@@ -10,5 +10,6 @@
         void SetFilePath(string path);
         void SetMessage(string message);
         bool LoadData();
+        void CloseDatabase();
     }
 }

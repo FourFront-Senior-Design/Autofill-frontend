@@ -98,5 +98,10 @@ namespace ViewModel
             }
             return true;
         }
+
+        public void CloseDatabase()
+        {
+            _database.Close();
+        }
     }
 }
