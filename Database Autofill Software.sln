@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceTests", "ServiceTest
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "Installer\Installer.vdproj", "{787F4FB9-1962-4EF8-9762-AEE1608BAA15}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataStructuresTests", "DataStructuresTests\DataStructuresTests.csproj", "{13553669-1D4B-4E69-A030-5827EB5C2EEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,14 @@ Global
 		{787F4FB9-1962-4EF8-9762-AEE1608BAA15}.Debug|x64.ActiveCfg = Debug
 		{787F4FB9-1962-4EF8-9762-AEE1608BAA15}.Release|Any CPU.ActiveCfg = Release
 		{787F4FB9-1962-4EF8-9762-AEE1608BAA15}.Release|x64.ActiveCfg = Release
+		{13553669-1D4B-4E69-A030-5827EB5C2EEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13553669-1D4B-4E69-A030-5827EB5C2EEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13553669-1D4B-4E69-A030-5827EB5C2EEE}.Debug|x64.ActiveCfg = Debug|x64
+		{13553669-1D4B-4E69-A030-5827EB5C2EEE}.Debug|x64.Build.0 = Debug|x64
+		{13553669-1D4B-4E69-A030-5827EB5C2EEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13553669-1D4B-4E69-A030-5827EB5C2EEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13553669-1D4B-4E69-A030-5827EB5C2EEE}.Release|x64.ActiveCfg = Release|Any CPU
+		{13553669-1D4B-4E69-A030-5827EB5C2EEE}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
