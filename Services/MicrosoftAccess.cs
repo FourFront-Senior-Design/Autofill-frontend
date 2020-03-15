@@ -910,7 +910,8 @@ namespace Services
 
         public void Close()
         {
-            _connection.Close();
+            if (_connection != null)
+                _connection.Close();
         }
 
         public string GetGraveSiteNum(int index)

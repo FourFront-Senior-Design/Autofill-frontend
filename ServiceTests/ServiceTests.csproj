@@ -30,6 +30,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -51,7 +52,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JsonReaderTests.cs" />
-    <Compile Include="MicrosoftAccessTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -63,20 +63,12 @@
       <Name>DataStructures</Name>
     </ProjectReference>
     <ProjectReference Include="..\ServicesInterface\ServicesInterface.csproj">
-      <Project>{8737a610-d70c-4704-bd02-8e3117fb0e5d}</Project>
+      <Project>{8737A610-D70C-4704-BD02-8E3117FB0E5D}</Project>
       <Name>ServicesInterface</Name>
     </ProjectReference>
     <ProjectReference Include="..\Services\Services.csproj">
       <Project>{4d2c5762-93f5-4115-84cd-edd57b5e49ad}</Project>
       <Name>Services</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ViewModelInterfaces\ViewModelInterfaces.csproj">
-      <Project>{4f4b4d45-6df7-4995-b1bd-c6399cf82138}</Project>
-      <Name>ViewModelInterfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ViewModel\ViewModel.csproj">
-      <Project>{8b616115-6f14-4656-9fc0-70d684d4022d}</Project>
-      <Name>ViewModel</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
