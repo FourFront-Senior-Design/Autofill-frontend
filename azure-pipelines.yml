@@ -38,25 +38,6 @@ steps:
   inputs:
     testAssemblyVer2: |
       **\$(buildConfiguration)\DataStructuresTests.dll
-      !**\obj\** 
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-    diagnosticsEnabled: true
-    codeCoverageEnabled: true
-
-- task: VSTest@2
-  inputs:
-    testAssemblyVer2: |
-      **\$(buildConfiguration)\MSAccessTests.dll
-      !**\obj\** 
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-    diagnosticsEnabled: true
-    codeCoverageEnabled: true
-    
-- task: VSTest@2
-  inputs:
-    testAssemblyVer2: |
       **\$(buildConfiguration)\ServicesTests.dll
       !**\obj\** 
     platform: '$(buildPlatform)'
