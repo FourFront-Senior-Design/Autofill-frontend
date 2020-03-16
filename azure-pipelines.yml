@@ -38,7 +38,7 @@ steps:
   inputs:
     testAssemblyVer2: |
       **\$(buildConfiguration)\DataStructuresTests.dll
-      **\$(buildConfiguration)\ServicesTests.dll
+      **\$(buildConfiguration)\ServiceTests.dll
       !**\obj\** 
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
