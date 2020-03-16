@@ -35,6 +35,12 @@ namespace Services
 
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
+        public MicrosoftAccess()
+        {
+            _connection = null;
+            _connectionString = "";
+        }
+
         public bool InitDBConnection(string sectionFilePath)
         {
             SectionFilePath = sectionFilePath;

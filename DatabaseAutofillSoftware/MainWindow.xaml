@@ -4,10 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" Icon="autofillprogramicon.ico"
-        Title="{Binding Title}" Height="450" Width="800" Background="#FFE4E4E4">
+        Title="{Binding Title}" Height="450" Width="830" Background="#FFE4E4E4">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.1*"/>
+            <RowDefinition Height="0.05*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="0.85*"/>
             <RowDefinition Height="0.15*"/>
@@ -29,7 +29,7 @@
                     Margin="7"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2.5*"/>
+                        <ColumnDefinition Width="3.5*"/>
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
                     <TextBox 
@@ -41,7 +41,7 @@
                         HorizontalAlignment="Stretch"
                         Padding="4"
                         TextChanged="OnTextChanged"
-                        Margin="100, 0, 0, 0"/>
+                        Margin="90, 0, 0, 0"/>
                     <Button
                         Content="Browse"
                         Grid.Column="1"
@@ -63,7 +63,7 @@
 
                 <Button
                     Content="Autofill Data" 
-                    Height="45" 
+                    Height="35" 
                     Width="130" 
                     FontSize="18"
                     Margin="10"
@@ -72,7 +72,7 @@
 
                 <Button 
                     Content="Exit" 
-                    Height="45" 
+                    Height="35" 
                     Width="130" 
                     FontSize="18" 
                     Margin="10"
@@ -92,7 +92,7 @@
                 Maximum="100"
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Bottom"
-                Height="30" 
+                Height="25" 
                 Width="500" 
                 BorderThickness="2" 
                 Margin="0,0,0,30"
@@ -101,6 +101,11 @@
         </Grid>
 
         <Grid Grid.Row="3">
+            <Label
+                Content="{Binding BackendVersion, Mode=OneWay}"                
+                FontSize="12"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Left"/>
             <Label
                 Content="{Binding Copyright, Mode=OneWay}"                
                 FontSize="12"
