@@ -11,7 +11,7 @@ namespace MSAccessTests
     [TestClass]
     public class MSAccessTests
     {
-        private static string exePath = Directory.GetCurrentDirectory() + "\\..\\..\\..\\";
+        private static string exePath = Directory.GetCurrentDirectory() + "\\..\\..\\..\\..\\";
         private string sectionPath = Path.Combine(exePath, "TestDatabases\\Section0000P_UprightMakerTypes");
         private Headstone testHeadstone = new Headstone();
 
