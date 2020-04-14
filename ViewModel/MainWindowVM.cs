@@ -1,6 +1,8 @@
 ﻿using ServicesInterface;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using ViewModelInterfaces;
 
 namespace ViewModel
@@ -22,10 +24,12 @@ namespace ViewModel
             _message = "";
             _backend = "No Version Found";
             _version = System.Reflection.AssemblyName.GetAssemblyName("DatabaseAutofillSoftware.exe").Version.ToString();
-            string backendVersionFile = @"C:\Python\Version";
-            if (File.Exists(backendVersionFile))
+            Regex reg = new Regex(@"VERSION_*");
+
+            var files = Directory.GetFiles(@"C:\Python\").Where(path => reg.IsMatch(path)).ToList();
+            if (files.Count() != 0)
             {
-                _backend = File.ReadAllText(backendVersionFile);
+                _backend = files[0];
             }
         }
 
