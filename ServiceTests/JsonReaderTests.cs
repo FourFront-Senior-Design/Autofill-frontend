@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Services;
-
+using System.Linq;
 
 namespace ServiceTests
 {
     [TestClass]
     public class JsonReaderTests
     {
-        private static string exePath = Directory.GetCurrentDirectory() + "\\..\\..\\..\\";
+        private static string exePath = Directory.GetCurrentDirectory() + "\\..\\..\\..\\..\\";
         private string sectionPath = Path.Combine(exePath, "TestDatabases\\Section0000P_UprightMakerTypes");
-        private Headstone testHeadstone = new Headstone();
+        private Headstone testHeadstone = new Headstone(); 
 
         public JsonReaderTests()
         {
@@ -36,7 +36,7 @@ namespace ServiceTests
             primary.DeathDate = "";
             primary.Inscription = "P_Inscription";
             primary.AwardCustom = "P_AwardCustom";
-            primary.AwardList = new List<string> { "P_A1", "P_A2", "P_A3", "P_A4", "P_A5", "P_A6", "P_A7" };
+            primary.AwardList = new List<string> { "", "P_A2", "P_A3", "P_A4", "P_A5", "P_A6", "P_A7" };
             primary.WarList = new List<string> { "", "", "P_W3", "P_W4" };
             primary.RankList = new List<string> { "", "P_R2", "P_R3" };
             primary.BranchList = new List<string> { "", "P_B2", "P_B3" };
@@ -151,10 +151,22 @@ namespace ServiceTests
             JsonOutputReader reader = new JsonOutputReader(dataBaseService);
 
             // Read the temp file
-            Dictionary<string, string> result = reader.ReadTmpFile(sectionPath + "\\testTempFiles\\test1.tmp");
+            Dictionary<string, string> result = new Dictionary<string, string>();
 
+            string path = sectionPath + "\\testTempFiles\\test1.tmp";
+
+            var query = (from line in File.ReadAllLines(path)
+                         let values = line.Split(':')
+                         select new { Key = values[0], Value = values[1] });
+
+            foreach (var item in query) 
+            {
+                result.Add(item.Key, item.Value);
+            }
+
+            
             // Assert that the output is correct
-            Assert.IsTrue(expected.Count == result.Count);
+            Assert.IsTrue(expected.Count == result.Count); 
         }
 
         [TestMethod]
@@ -181,7 +193,18 @@ namespace ServiceTests
             JsonOutputReader reader = new JsonOutputReader(dataBaseService);
 
             // Read the temp file
-            Dictionary<string, string> result = reader.ReadTmpFile(sectionPath + "\\testTempFiles\\test1.tmp");
+            Dictionary<string, string> result = new Dictionary<string, string>();
+
+            string path = sectionPath + "\\testTempFiles\\test1.tmp";
+
+            var query = (from line in File.ReadAllLines(path)
+                         let values = line.Split(':')
+                         select new { Key = values[0], Value = values[1] });
+
+            foreach (var item in query)
+            {
+                result.Add(item.Key, item.Value);
+            }
 
             // Assert that the values are correct
             foreach (string key in result.Keys)
@@ -213,7 +236,18 @@ namespace ServiceTests
             JsonOutputReader reader = new JsonOutputReader(dataBaseService);
 
             // Read the temp file
-            Dictionary<string, string> result = reader.ReadTmpFile(sectionPath + "\\testTempFiles\\test1.tmp");
+            Dictionary<string, string> result = new Dictionary<string, string>();
+
+            string path = sectionPath + "\\testTempFiles\\test1.tmp";
+
+            var query = (from line in File.ReadAllLines(path)
+                         let values = line.Split(':')
+                         select new { Key = values[0], Value = values[1] });
+
+            foreach (var item in query)
+            {
+                result.Add(item.Key, item.Value);
+            }
 
             Headstone tempHeadstone = testHeadstone;
 

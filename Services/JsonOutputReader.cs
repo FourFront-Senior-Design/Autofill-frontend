@@ -159,19 +159,19 @@ namespace Services
             bool updateDB = false;
             string value;
 
-            if (tmpData.TryGetValue("First Name", out value)
+            if (tmpData.TryGetValue("FirstName", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.FirstName))
             {
                 h.PrimaryDecedent.FirstName = value.Trim('\r');
                 updateDB = true;
             }
-            if (tmpData.TryGetValue("Middle Name", out value)
+            if (tmpData.TryGetValue("MiddleName", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.MiddleName))
             {
                 h.PrimaryDecedent.MiddleName = value.Trim('\r');
                 updateDB = true;
             }
-            if (tmpData.TryGetValue("Last Name", out value)
+            if (tmpData.TryGetValue("LastName", out value)
                 && string.IsNullOrWhiteSpace(h.PrimaryDecedent.LastName))
             {
                 h.PrimaryDecedent.LastName = value.Trim('\r');
@@ -262,25 +262,25 @@ namespace Services
             }
 
             // Secondary 
-            if (tmpData.TryGetValue("First Name Spouse/Dependent", out value)
+            if (tmpData.TryGetValue("FirstNameS_D", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].FirstName))
             {
                 h.OthersDecedentList[0].FirstName = value.Trim('\r');
                 updateDB = true;
             }
-            if (tmpData.TryGetValue("Middle Name Spouse/Dependent", out value)
+            if (tmpData.TryGetValue("MiddleNameS_D", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].MiddleName))
             {
                 h.OthersDecedentList[0].MiddleName = value.Trim('\r');
                 updateDB = true;
             }
-            if (tmpData.TryGetValue("Last Name Spouse/Dependent", out value)
+            if (tmpData.TryGetValue("LastNameS_D", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].LastName))
             {
                 h.OthersDecedentList[0].LastName = value.Trim('\r');
                 updateDB = true;
             }
-            if (tmpData.TryGetValue("Suffix Spouse/Dependent", out value)
+            if (tmpData.TryGetValue("SuffixS_D", out value)
                 && string.IsNullOrWhiteSpace(h.OthersDecedentList[0].Suffix))
             {
                 h.OthersDecedentList[0].Suffix = value.Trim('\r');
@@ -302,7 +302,7 @@ namespace Services
                     updateDB = true;
                 }
             }
-            List<string> BranchSD = new List<string>() { "Branch", "Branch2", "Branch3" };
+            List<string> BranchSD = new List<string>() { "BranchS_D", "Branch2S_D", "Branch3S_D" };
             for (int i = 0; i < 3; i++)
             {
                 if (tmpData.TryGetValue(BranchSD[i], out value)
