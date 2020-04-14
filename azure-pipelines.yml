@@ -34,3 +34,13 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
+- task: VSTest@2
+  inputs:
+    testAssemblyVer2: |
+      **\$(buildConfiguration)\DataStructuresTests.dll
+      **\$(buildConfiguration)\ServiceTests.dll
+      !**\obj\** 
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    diagnosticsEnabled: true
+    codeCoverageEnabled: true

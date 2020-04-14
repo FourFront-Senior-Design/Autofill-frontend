@@ -15,6 +15,7 @@ namespace Services
     public class MicrosoftAccess : IDatabaseService
     {
         private string _connectionString;
+        private OleDbConnection _connection;
 
         private List<string> SequenceIDs { get; set; }
 
@@ -34,13 +35,29 @@ namespace Services
 
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
+        public MicrosoftAccess()
+        {
+            _connection = null;
+            _connectionString = "";
+        }
+
         public bool InitDBConnection(string sectionFilePath)
         {
             SectionFilePath = sectionFilePath;
 
-
             GetAccessFilePath();
             TestFileAccess();
+
+            // using to ensure connection is closed when we are done
+            _connection = new OleDbConnection(_connectionString);
+            try
+            {
+                _connection.Open(); // try to open the connection
+            }
+            catch (Exception e)
+            {
+                ThrowAndLogArgumentException("Error accessing the MS Access Database", e);
+            }
 
             TotalItems = GetTotalRecords();
 
@@ -52,29 +69,6 @@ namespace Services
             SequenceIDs = GetSequenceIDs();
 
             return true;
-        }
-
-        public void CreateRecordTypeFile()
-        {
-            StreamWriter writer = new StreamWriter(SectionFilePath + "\\recordTypeList.tmp");
-
-            for (int i = 1; i < TotalItems + 1; i++)
-            {
-                Headstone headstone = GetHeadstone(i);
-
-                string imageName1 = headstone.Image1FileName.Split('.')[0];
-
-                writer.Write(imageName1);
-
-                if (!string.IsNullOrWhiteSpace(headstone.Image2FileName))
-                {
-                    string imageName2 = headstone.Image2FileName.Split('.')[0];
-                    writer.Write(" " + imageName2);
-                }
-                writer.Write("\n");
-            }
-
-            writer.Close();
         }
 
         private void GetAccessFilePath()
@@ -127,20 +121,16 @@ namespace Services
             OleDbDataReader reader;
             int totalRecords = 0;
 
-            using (OleDbConnection connection = new OleDbConnection(_connectionString)) // using to ensure connection is closed when we are done
+            try
             {
-                try
-                {
-                    cmd = new OleDbCommand(sqlQuery, connection);
-                    connection.Open(); // try to open the connection
-                    reader = cmd.ExecuteReader();
-                    reader.Read();
-                    totalRecords = reader.GetInt32(0);
-                }
-                catch (Exception e)
-                {
-                    ThrowAndLogArgumentException("Error getting total record count", e);
-                }
+                cmd = new OleDbCommand(sqlQuery, _connection);
+                reader = cmd.ExecuteReader();
+                reader.Read();
+                totalRecords = reader.GetInt32(0);
+            }
+            catch (Exception e)
+            {
+                ThrowAndLogArgumentException("Error getting total record count", e);
             }
 
             return totalRecords;
@@ -169,7 +159,7 @@ namespace Services
 
                 headstone.OthersDecedentList = GetAddtionalDecedents(dataRow);
 
-                //Console.WriteLine((int)MasterTableCols.FrontFilename);
+                Console.WriteLine((int)MasterTableCols.FrontFilename);
                 headstone.Image1FilePath = dataRow[(int)MasterTableCols.FrontFilename].ToString();
                 headstone.Image2FilePath = dataRow[(int)MasterTableCols.BackFilename].ToString();
 
@@ -199,39 +189,47 @@ namespace Services
             }
         }
 
+        public void CreateRecordTypeFile()
+        {
+            StreamWriter writer = new StreamWriter(SectionFilePath + "\\recordTypeList.tmp");
+
+            for (int i = 1; i < TotalItems + 1; i++)
+            {
+                Headstone headstone = GetHeadstone(i);
+
+                string imageName1 = headstone.Image1FileName.Split('.')[0];
+
+                writer.Write(imageName1);
+
+                if (!string.IsNullOrWhiteSpace(headstone.Image2FileName))
+                {
+                    string imageName2 = headstone.Image2FileName.Split('.')[0];
+                    writer.Write(" " + imageName2);
+                }
+                writer.Write("\n");
+            }
+
+            writer.Close();
+        }
+
         private object[] GetDataRow(string sqlQuery)
         {
             OleDbCommand cmd;
             OleDbDataReader reader;
-            object[] dataRow;
+            object[] dataRow = null;
 
-
-            using (OleDbConnection connection = new OleDbConnection(_connectionString)) // using to ensure connection is closed when we are done
+            try
             {
-                try
-                {
-                    cmd = new OleDbCommand(sqlQuery, connection);
-                    connection.Open(); // try to open the connection
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error accsessing Database");
-                    throw e;
-                }
+                cmd = new OleDbCommand(sqlQuery, _connection);
+                reader = cmd.ExecuteReader();
+                reader.Read();
 
-                try
-                {
-                    reader = cmd.ExecuteReader();
-                    reader.Read();
-
-                    dataRow = new object[reader.FieldCount];
-                    reader.GetValues(dataRow);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
+                dataRow = new object[reader.FieldCount];
+                reader.GetValues(dataRow);
+            }
+            catch (Exception e)
+            {
+                ThrowAndLogArgumentException("Error getting the record row data", e);
             }
 
             return dataRow;
@@ -247,28 +245,28 @@ namespace Services
             primaryPerson.Suffix = dataRow[(int)MasterTableCols.Suffix].ToString();
             primaryPerson.Location = dataRow[(int)MasterTableCols.Location].ToString();
 
-            primaryPerson.RankList.Add(dataRow[(int)MasterTableCols.Rank].ToString());
-            primaryPerson.RankList.Add(dataRow[(int)MasterTableCols.Rank2].ToString());
-            primaryPerson.RankList.Add(dataRow[(int)MasterTableCols.Rank3].ToString());
+            primaryPerson.AddRank(dataRow[(int)MasterTableCols.Rank].ToString());
+            primaryPerson.AddRank(dataRow[(int)MasterTableCols.Rank2].ToString());
+            primaryPerson.AddRank(dataRow[(int)MasterTableCols.Rank3].ToString());
 
-            primaryPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award].ToString());
-            primaryPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award2].ToString());
-            primaryPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award3].ToString());
-            primaryPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award4].ToString());
-            primaryPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award5].ToString());
-            primaryPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award6].ToString());
-            primaryPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award7].ToString());
+            primaryPerson.AddAward(dataRow[(int)MasterTableCols.Award].ToString());
+            primaryPerson.AddAward(dataRow[(int)MasterTableCols.Award2].ToString());
+            primaryPerson.AddAward(dataRow[(int)MasterTableCols.Award3].ToString());
+            primaryPerson.AddAward(dataRow[(int)MasterTableCols.Award4].ToString());
+            primaryPerson.AddAward(dataRow[(int)MasterTableCols.Award5].ToString());
+            primaryPerson.AddAward(dataRow[(int)MasterTableCols.Award6].ToString());
+            primaryPerson.AddAward(dataRow[(int)MasterTableCols.Award7].ToString());
 
             primaryPerson.AwardCustom = dataRow[(int)MasterTableCols.Awards_Custom].ToString();
 
-            primaryPerson.WarList.Add(dataRow[(int)MasterTableCols.War].ToString());
-            primaryPerson.WarList.Add(dataRow[(int)MasterTableCols.War2].ToString());
-            primaryPerson.WarList.Add(dataRow[(int)MasterTableCols.War3].ToString());
-            primaryPerson.WarList.Add(dataRow[(int)MasterTableCols.War4].ToString());
+            primaryPerson.AddWar(dataRow[(int)MasterTableCols.War].ToString());
+            primaryPerson.AddWar(dataRow[(int)MasterTableCols.War2].ToString());
+            primaryPerson.AddWar(dataRow[(int)MasterTableCols.War3].ToString());
+            primaryPerson.AddWar(dataRow[(int)MasterTableCols.War4].ToString());
 
-            primaryPerson.BranchList.Add(dataRow[(int)MasterTableCols.Branch].ToString());
-            primaryPerson.BranchList.Add(dataRow[(int)MasterTableCols.Branch2].ToString());
-            primaryPerson.BranchList.Add(dataRow[(int)MasterTableCols.Branch3].ToString());
+            primaryPerson.AddBranch(dataRow[(int)MasterTableCols.Branch].ToString());
+            primaryPerson.AddBranch(dataRow[(int)MasterTableCols.Branch2].ToString());
+            primaryPerson.AddBranch(dataRow[(int)MasterTableCols.Branch3].ToString());
 
             primaryPerson.BranchUnitCustom = dataRow[(int)MasterTableCols.Branch_Unit_CustomV].ToString();
 
@@ -303,28 +301,28 @@ namespace Services
             secondPerson.Suffix = dataRow[(int)MasterTableCols.SuffixS_D].ToString();
             secondPerson.Location = dataRow[(int)MasterTableCols.LocationS_D].ToString();
 
-            secondPerson.RankList.Add(dataRow[(int)MasterTableCols.RankS_D].ToString());
-            secondPerson.RankList.Add(dataRow[(int)MasterTableCols.Rank2S_D].ToString());
-            secondPerson.RankList.Add(dataRow[(int)MasterTableCols.Rank3S_D].ToString());
+            secondPerson.AddRank(dataRow[(int)MasterTableCols.RankS_D].ToString());
+            secondPerson.AddRank(dataRow[(int)MasterTableCols.Rank2S_D].ToString());
+            secondPerson.AddRank(dataRow[(int)MasterTableCols.Rank3S_D].ToString());
 
-            secondPerson.AwardList.Add(dataRow[(int)MasterTableCols.AwardS_D].ToString());
-            secondPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award2S_D].ToString());
-            secondPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award3S_D].ToString());
-            secondPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award4S_D].ToString());
-            secondPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award5S_D].ToString());
-            secondPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award6S_D].ToString());
-            secondPerson.AwardList.Add(dataRow[(int)MasterTableCols.Award7S_D].ToString());
+            secondPerson.AddAward(dataRow[(int)MasterTableCols.AwardS_D].ToString());
+            secondPerson.AddAward(dataRow[(int)MasterTableCols.Award2S_D].ToString());
+            secondPerson.AddAward(dataRow[(int)MasterTableCols.Award3S_D].ToString());
+            secondPerson.AddAward(dataRow[(int)MasterTableCols.Award4S_D].ToString());
+            secondPerson.AddAward(dataRow[(int)MasterTableCols.Award5S_D].ToString());
+            secondPerson.AddAward(dataRow[(int)MasterTableCols.Award6S_D].ToString());
+            secondPerson.AddAward(dataRow[(int)MasterTableCols.Award7S_D].ToString());
 
             secondPerson.AwardCustom = dataRow[(int)MasterTableCols.Awards_CustomS_D].ToString();
 
-            secondPerson.WarList.Add(dataRow[(int)MasterTableCols.WarS_D].ToString());
-            secondPerson.WarList.Add(dataRow[(int)MasterTableCols.War2S_D].ToString());
-            secondPerson.WarList.Add(dataRow[(int)MasterTableCols.War3S_D].ToString());
-            secondPerson.WarList.Add(dataRow[(int)MasterTableCols.War4S_D].ToString());
+            secondPerson.AddWar(dataRow[(int)MasterTableCols.WarS_D].ToString());
+            secondPerson.AddWar(dataRow[(int)MasterTableCols.War2S_D].ToString());
+            secondPerson.AddWar(dataRow[(int)MasterTableCols.War3S_D].ToString());
+            secondPerson.AddWar(dataRow[(int)MasterTableCols.War4S_D].ToString());
 
-            secondPerson.BranchList.Add(dataRow[(int)MasterTableCols.BranchS_D].ToString());
-            secondPerson.BranchList.Add(dataRow[(int)MasterTableCols.Branch2S_D].ToString());
-            secondPerson.BranchList.Add(dataRow[(int)MasterTableCols.Branch3S_D].ToString());
+            secondPerson.AddBranch(dataRow[(int)MasterTableCols.BranchS_D].ToString());
+            secondPerson.AddBranch(dataRow[(int)MasterTableCols.Branch2S_D].ToString());
+            secondPerson.AddBranch(dataRow[(int)MasterTableCols.Branch3S_D].ToString());
 
             secondPerson.BranchUnitCustom = dataRow[(int)MasterTableCols.Branch_Unit_CustomS_D].ToString();
 
@@ -346,13 +344,13 @@ namespace Services
             thirdPerson.Suffix = dataRow[(int)MasterTableCols.SuffixS_D_2].ToString();
             thirdPerson.Location = dataRow[(int)MasterTableCols.LocationS_D_2].ToString();
 
-            thirdPerson.RankList.Add(dataRow[(int)MasterTableCols.RankS_D_2].ToString());
+            thirdPerson.AddRank(dataRow[(int)MasterTableCols.RankS_D_2].ToString());
 
-            thirdPerson.AwardList.Add(dataRow[(int)MasterTableCols.AwardS_D_2].ToString());
+            thirdPerson.AddAward(dataRow[(int)MasterTableCols.AwardS_D_2].ToString());
 
-            thirdPerson.WarList.Add(dataRow[(int)MasterTableCols.WarS_D_2].ToString());
+            thirdPerson.AddWar(dataRow[(int)MasterTableCols.WarS_D_2].ToString());
 
-            thirdPerson.BranchList.Add(dataRow[(int)MasterTableCols.BranchS_D_2].ToString());
+            thirdPerson.AddBranch(dataRow[(int)MasterTableCols.BranchS_D_2].ToString());
 
             thirdPerson.BirthDate = dataRow[(int)MasterTableCols.BirthDateS_D_2].ToString();
             thirdPerson.DeathDate = dataRow[(int)MasterTableCols.DeathDateS_D_2].ToString();
@@ -372,13 +370,13 @@ namespace Services
             forthPerson.Suffix = dataRow[(int)MasterTableCols.SuffixS_D_3].ToString();
             forthPerson.Location = dataRow[(int)MasterTableCols.LocationS_D_3].ToString();
 
-            forthPerson.RankList.Add(dataRow[(int)MasterTableCols.RankS_D_3].ToString());
+            forthPerson.AddRank(dataRow[(int)MasterTableCols.RankS_D_3].ToString());
 
-            forthPerson.AwardList.Add(dataRow[(int)MasterTableCols.AwardS_D_3].ToString());
+            forthPerson.AddAward(dataRow[(int)MasterTableCols.AwardS_D_3].ToString());
 
-            forthPerson.WarList.Add(dataRow[(int)MasterTableCols.WarS_D_3].ToString());
+            forthPerson.AddWar(dataRow[(int)MasterTableCols.WarS_D_3].ToString());
 
-            forthPerson.BranchList.Add(dataRow[(int)MasterTableCols.BranchS_D_3].ToString());
+            forthPerson.AddBranch(dataRow[(int)MasterTableCols.BranchS_D_3].ToString());
 
             forthPerson.BirthDate = dataRow[(int)MasterTableCols.BirthDateS_D_3].ToString();
             forthPerson.DeathDate = dataRow[(int)MasterTableCols.DeathDateS_D_3].ToString();
@@ -398,13 +396,13 @@ namespace Services
             fithPerson.Suffix = dataRow[(int)MasterTableCols.SuffixS_D_4].ToString();
             fithPerson.Location = dataRow[(int)MasterTableCols.LocationS_D_4].ToString();
 
-            fithPerson.RankList.Add(dataRow[(int)MasterTableCols.RankS_D_4].ToString());
+            fithPerson.AddRank(dataRow[(int)MasterTableCols.RankS_D_4].ToString());
 
-            fithPerson.AwardList.Add(dataRow[(int)MasterTableCols.AwardS_D_4].ToString());
+            fithPerson.AddAward(dataRow[(int)MasterTableCols.AwardS_D_4].ToString());
 
-            fithPerson.WarList.Add(dataRow[(int)MasterTableCols.WarS_D_4].ToString());
+            fithPerson.AddWar(dataRow[(int)MasterTableCols.WarS_D_4].ToString());
 
-            fithPerson.BranchList.Add(dataRow[(int)MasterTableCols.BranchS_D_4].ToString());
+            fithPerson.AddBranch(dataRow[(int)MasterTableCols.BranchS_D_4].ToString());
 
             fithPerson.BirthDate = dataRow[(int)MasterTableCols.BirthDateS_D_4].ToString();
             fithPerson.DeathDate = dataRow[(int)MasterTableCols.DeathDateS_D_4].ToString();
@@ -454,34 +452,28 @@ namespace Services
             OleDbDataReader reader;
 
             string sqlQuery = "SELECT * FROM CemeteryNames";
+            cmd = new OleDbCommand(sqlQuery, _connection);
 
-            using (OleDbConnection connection = new OleDbConnection(_connectionString))
+            try
             {
-                cmd = new OleDbCommand(sqlQuery, connection);
-                connection.Open();
+                reader = cmd.ExecuteReader();
 
-                try
+                while (reader.Read())
                 {
-                    reader = cmd.ExecuteReader();
+                    CemeteryNameData data = new CemeteryNameData();
 
-                    while (reader.Read())
-                    {
-                        CemeteryNameData data = new CemeteryNameData();
+                    data.ID = reader.GetInt32(0);
+                    data.CemeteryName = reader.GetString(1).ToUpper();
+                    data.KeyName = reader.GetString(2).ToUpper();
 
-                        data.ID = reader.GetInt32(0);
-                        data.CemeteryName = reader.GetString(1).ToUpper();
-                        data.KeyName = reader.GetString(2).ToUpper();
-
-                        CemetaryData.Add(data);
-                    }
-                    reader.Close();
-                    connection.Close();
-
+                    CemetaryData.Add(data);
                 }
-                catch (Exception e)
-                {
-                    ThrowAndLogArgumentException("Error getting cemetery data", e);
-                }
+                reader.Close();
+
+            }
+            catch (Exception e)
+            {
+                ThrowAndLogArgumentException("Error getting cemetery data", e);
             }
 
             CemetaryData = CemetaryData.OrderBy(x => x.CemeteryName).ToList();
@@ -496,35 +488,27 @@ namespace Services
 
             string sqlQuery = "SELECT CODE, AWARD FROM AwardList";
 
-            using (OleDbConnection connection = new OleDbConnection(_connectionString))
+            try
             {
+                cmd = new OleDbCommand(sqlQuery, _connection);
+                reader = cmd.ExecuteReader();
 
-                cmd = new OleDbCommand(sqlQuery, connection);
-                connection.Open();
-
-                try
+                while (reader.Read())
                 {
-                    reader = cmd.ExecuteReader();
+                    AwardData data = new AwardData();
 
-                    while (reader.Read())
-                    {
-                        AwardData data = new AwardData();
+                    data.Code = reader.GetString(0).ToUpper();
+                    data.Award = reader.GetString(1).ToUpper();
 
-                        data.Code = reader.GetString(0).ToUpper();
-                        data.Award = reader.GetString(1).ToUpper();
-
-                        AwardNames.Add(data);
-                    }
-
-
-                    reader.Close();
-                    connection.Close();
-
+                    AwardNames.Add(data);
                 }
-                catch (Exception e)
-                {
-                    ThrowAndLogArgumentException("Error getting award data", e);
-                }
+
+                reader.Close();
+
+            }
+            catch (Exception e)
+            {
+                ThrowAndLogArgumentException("Error getting award data", e);
             }
 
             AwardNames = AwardNames.OrderBy(x => x.Code).ToList();
@@ -539,21 +523,10 @@ namespace Services
 
             string sqlQuery = "SELECT Code, [Branch of Service], [Short Description] FROM BranchList";
 
-            using (OleDbConnection connection = new OleDbConnection(_connectionString))
+            try
             {
-                try
-                {
-                    cmd = new OleDbCommand(sqlQuery, connection);
-                    connection.Open();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error accsessing Database");
-                    throw e;
-                }
-
+                cmd = new OleDbCommand(sqlQuery, _connection);
                 reader = cmd.ExecuteReader();
-
                 while (reader.Read())
                 {
                     BranchData data = new BranchData();
@@ -565,9 +538,11 @@ namespace Services
                     BranchNames.Add(data);
                 }
 
-
                 reader.Close();
-                connection.Close();
+            }
+            catch (Exception e)
+            {
+                ThrowAndLogArgumentException("Error getting branchList data", e);
             }
 
             BranchNames = BranchNames.OrderBy(x => x.Code).ToList();
@@ -582,19 +557,9 @@ namespace Services
 
             string sqlQuery = "SELECT Code, [Short Description] FROM WarList";
 
-            using (OleDbConnection connection = new OleDbConnection(_connectionString))
+            try
             {
-                try
-                {
-                    cmd = new OleDbCommand(sqlQuery, connection);
-                    connection.Open();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error accsessing Database");
-                    throw e;
-                }
-
+                cmd = new OleDbCommand(sqlQuery, _connection);
                 reader = cmd.ExecuteReader();
 
                 while (reader.Read())
@@ -607,17 +572,17 @@ namespace Services
                     WarNames.Add(data);
                 }
 
-
                 reader.Close();
-                connection.Close();
+            }
+            catch (Exception e)
+            {
+                ThrowAndLogArgumentException("Error getting warList data", e);
             }
 
             WarNames = WarNames.OrderBy(x => x.Code).ToList();
             return WarNames;
         }
-
-
-
+        
         private List<LocationData> GetLocationData()
         {
             List<LocationData> LocationNames = new List<LocationData>();
@@ -625,21 +590,9 @@ namespace Services
             OleDbDataReader reader;
 
             string sqlQuery = "SELECT ID, LocationAbbrev, Location FROM LocationList";
-
-            using (OleDbConnection connection = new OleDbConnection(_connectionString))
+            try
             {
-                try
-                {
-                    cmd = new OleDbCommand(sqlQuery, connection);
-                    connection.Open();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error accsessing Database");
-                    throw e;
-                }
-
-
+                cmd = new OleDbCommand(sqlQuery, _connection);
                 reader = cmd.ExecuteReader();
 
                 while (reader.Read())
@@ -653,9 +606,11 @@ namespace Services
                     LocationNames.Add(data);
                 }
 
-
                 reader.Close();
-                connection.Close();
+            }
+            catch (Exception e)
+            {
+                ThrowAndLogArgumentException("Error getting locationList data", e);
             }
 
             LocationNames = LocationNames.OrderBy(x => x.Location).ToList();
@@ -673,45 +628,41 @@ namespace Services
             }
             return "";
         }
-        
+
         private List<string> GetSequenceIDs()
         {
             List<string> sequenceIDs = new List<string>();
+            OleDbCommand cmd;
+            OleDbDataReader reader;
 
-            using (OleDbConnection connection = new OleDbConnection(_connectionString))
+            try
             {
-                OleDbCommand cmd;
-                OleDbDataReader reader;
-
-                try
-                {
-                    connection.Open();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error Accessing Database");
-                    throw e;
-                }
-
-                try
-                {
-                    string sqlQuery = "SELECT SequenceID FROM Master;";
-                    cmd = new OleDbCommand(sqlQuery, connection);
-                    reader = cmd.ExecuteReader();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error Querying for SequenceIDs");
-                    throw e;
-                }
-
-                while (reader.Read())
-                {
-                    sequenceIDs.Add(reader.GetString(0));
-                }
-
-                reader.Close();
+                string sqlQuery = "SELECT SequenceID FROM Master;";
+                cmd = new OleDbCommand(sqlQuery, _connection);
+                reader = cmd.ExecuteReader();
             }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error Querying for SequenceIDs");
+                throw e;
+            }
+
+            while (reader.Read())
+            {
+
+                var value = reader.GetValue(0);
+                var valType = value.GetType();
+                if (valType == typeof(string))
+                {
+                    sequenceIDs.Add(value as string);
+                }
+                else
+                {
+                    throw new ArgumentException($"Invalid or Empty Sequence ID");
+                }
+            }
+
+            reader.Close();
             sequenceIDs.Sort();
             return sequenceIDs;
         }
@@ -746,57 +697,44 @@ namespace Services
             //sqlQuery += @" WHERE SequenceID = '" + sequenceID[index] + @"';";
             sqlQuery += @" WHERE SequenceID = '" + SequenceIDs[index - 1] + "';";
 
-            OleDbCommand cmd;
-            using (OleDbConnection connection = new OleDbConnection(_connectionString)) // using to ensure connection is closed when we are done
+            OleDbCommand cmd = new OleDbCommand(sqlQuery, _connection);
+
+            string[] intEntries = { "Emblem1", "Emblem2" };
+            foreach (KeyValuePair<string, string> entry in headstoneData)
             {
                 try
                 {
-                    cmd = new OleDbCommand(sqlQuery, connection);
-                    connection.Open(); // try to open the connection
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error accessing Database");
-                    throw e;
-                }
-
-                string[] intEntries = { "Wall", "Emblem1", "Emblem2" };
-                foreach (KeyValuePair<string, string> entry in headstoneData)
-                {
-                    try
+                    if (intEntries.Contains(entry.Key))
                     {
-                        if (intEntries.Contains(entry.Key))
-                        {
-                            if (entry.Value == "")
-                                cmd.Parameters.AddWithValue("@" + entry.Key, OleDbType.Integer).Value = DBNull.Value;
-                            else
-                                cmd.Parameters.AddWithValue("@" + entry.Key, Convert.ToInt32(entry.Value));
-                        }
+                        if (entry.Value == "")
+                            cmd.Parameters.AddWithValue("@" + entry.Key, OleDbType.Integer).Value = DBNull.Value;
                         else
-                        {
-                            if (entry.Value == "")
-                                cmd.Parameters.AddWithValue("@" + entry.Key, OleDbType.VarChar).Value = DBNull.Value;
-                            else
-                                cmd.Parameters.AddWithValue("@" + entry.Key, entry.Value);
-                        }
+                            cmd.Parameters.AddWithValue("@" + entry.Key, Convert.ToInt32(entry.Value));
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Console.WriteLine("Error with: " + entry.Key + " = " + entry.Value);
-                        Console.WriteLine(e);
+                        if (entry.Value == "")
+                            cmd.Parameters.AddWithValue("@" + entry.Key, OleDbType.VarChar).Value = DBNull.Value;
+                        else
+                            cmd.Parameters.AddWithValue("@" + entry.Key, entry.Value);
                     }
-                }
-
-                try
-                {
-                    cmd.ExecuteNonQuery(); // do the update
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error writing to the database:");
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine(cmd.CommandText);
+                    Console.WriteLine("Error with: " + entry.Key + " = " + entry.Value);
+                    Console.WriteLine(e);
                 }
+            }
+
+            try
+            {
+                cmd.ExecuteNonQuery(); // do the update
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error writing to the database:");
+                Console.WriteLine(e.Message);
+                Console.WriteLine(cmd.CommandText);
             }
         }
 
@@ -974,6 +912,41 @@ namespace Services
 
             dict.Add("BirthDateS_D_6", headstone.OthersDecedentList[5].BirthDate);
             dict.Add("DeathDateS_D_6", headstone.OthersDecedentList[5].DeathDate);
+        }
+
+        public void Close()
+        {
+            if (_connection != null)
+                _connection.Close();
+        }
+
+        public string GetGraveSiteNum(int index)
+        {
+            if (index < 1)
+            {
+                return "";
+            }
+
+            string graveSiteNum = "";
+            OleDbCommand cmd;
+            OleDbDataReader reader;
+
+            string sqlQuery = "SELECT GravesiteNumber FROM Master " +
+                "WHERE SequenceID = \"" + SequenceIDs[index - 1] + "\"";
+            try
+            {
+                cmd = new OleDbCommand(sqlQuery, _connection);
+                reader = cmd.ExecuteReader();
+                reader.Read();
+
+                graveSiteNum = reader.GetString(0);
+                return graveSiteNum;
+            }
+            catch (Exception e)
+            {
+                ThrowAndLogArgumentException("Error getting the record row data", e);
+                return "";
+            }
         }
     }
 }

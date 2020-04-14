@@ -47,6 +47,10 @@ namespace DatabaseAutofillSoftware
         {
             if(_viewModel.LoadData())
             {
+                sectionPath.IsEnabled = false;
+                Properties.Settings.Default.databaseFilePath = _viewModel.FileLocation;
+                Properties.Settings.Default.Save();
+
                 autofillProgress.Visibility = Visibility.Visible;
                 BackgroundWorker worker = new BackgroundWorker();
                 worker.WorkerReportsProgress = true;
@@ -55,7 +59,7 @@ namespace DatabaseAutofillSoftware
 
                 worker.RunWorkerAsync();
             }
-
+            
             sectionPath.Focus();
             sectionPath.Select(_viewModel.FileLocation.Length, 0);
         }
@@ -64,9 +68,6 @@ namespace DatabaseAutofillSoftware
         {
             (sender as BackgroundWorker).ReportProgress(1);
 
-            Properties.Settings.Default.databaseFilePath = _viewModel.FileLocation;
-            Properties.Settings.Default.Save();
-
             _viewModel.SetMessage("Database loaded successfully...");
             _database.CreateRecordTypeFile();
 
@@ -74,7 +75,7 @@ namespace DatabaseAutofillSoftware
             
             _viewModel.SetMessage("Google Vision running...");
 
-            _autofillService.runScripts(_viewModel.FileLocation);
+            _autofillService.RunScripts(_viewModel.FileLocation);
 
             (sender as BackgroundWorker).ReportProgress(75);
 
@@ -97,15 +98,21 @@ namespace DatabaseAutofillSoftware
         void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             autofillProgress.Value = e.ProgressPercentage;
+            if (autofillProgress.Value == 100)
+            {
+                sectionPath.IsEnabled = true;
+            }
         }
 
         private void OnTextChanged(object sender, RoutedEventArgs e)
         {
+            autofillProgress.Visibility = Visibility.Collapsed;
             _viewModel.SetMessage(string.Empty);
         }
 
         private void ExitClick(object sender, RoutedEventArgs e)
         {
+            _viewModel.CloseDatabase();
             this.Close();
             Application.Current.Shutdown();
         }

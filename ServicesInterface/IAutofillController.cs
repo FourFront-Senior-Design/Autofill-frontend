@@ -8,6 +8,6 @@ namespace ServicesInterface
 {
     public interface IAutofillController
     {
-        void runScripts(string filePath);
+        void RunScripts(string filePath);
     }
 }
