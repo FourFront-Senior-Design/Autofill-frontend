@@ -1,5 +1,8 @@
 ﻿using ServicesInterface;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using ViewModelInterfaces;
 
 namespace ViewModel
@@ -10,6 +13,7 @@ namespace ViewModel
         private string _fileLocation;
         private string _message;
         private string _version;
+        private readonly string _backend;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -18,7 +22,15 @@ namespace ViewModel
             _database = database;
             _fileLocation = "";
             _message = "";
+            _backend = "No Version Found";
             _version = System.Reflection.AssemblyName.GetAssemblyName("DatabaseAutofillSoftware.exe").Version.ToString();
+            Regex reg = new Regex(@"VERSION_*");
+
+            var files = Directory.GetFiles(@"C:\Python\").Where(path => reg.IsMatch(path)).ToList();
+            if (files.Count() != 0)
+            {
+                _backend = files[0];
+            }
         }
 
         public string Copyright
@@ -27,6 +39,14 @@ namespace ViewModel
             {
                 string copyrightSymbol = "\u00a9";
                 return $"Senior Design Data Extraction Project {copyrightSymbol} 2019. Version {_version}";
+            }
+        }
+
+        public string BackendVersion
+        {
+            get
+            {
+                return _backend;
             }
         }
 
@@ -97,6 +117,11 @@ namespace ViewModel
                 Message = "Successfully loaded " + count.ToString() + " records from the Database.";
             }
             return true;
+        }
+
+        public void CloseDatabase()
+        {
+            _database.Close();
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Services
 {
     public class AutofillController : IAutofillController
     {
-        public void runScripts(string filePath)
+        public void RunScripts(string filePath)
         {
             String pythonInstallation = @"C:\Python";
 
