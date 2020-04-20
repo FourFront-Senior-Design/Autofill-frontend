@@ -98,7 +98,8 @@ namespace Services
             writer.Write("Uprights: " + totalUprights.ToString());
             writer.Write("\nFlats: " +  totalFlats.ToString());
             writer.Close();
-
+            _database.Close();
+     
             return _missedRecords;
         }
 
