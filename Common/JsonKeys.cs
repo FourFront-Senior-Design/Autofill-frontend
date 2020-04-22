@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿/* a list of keys that are present in the json files with the extracted texts*/
+using System.Collections.Generic;
 
 namespace Common
 {

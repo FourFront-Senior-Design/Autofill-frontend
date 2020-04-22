@@ -103,6 +103,7 @@ namespace Services
             return _missedRecords;
         }
 
+        // Reads the extracted texts from the .tmp files that contant the extracted texts
         public Dictionary<string, string> ReadTmpFile(string filename)
         {
             // Private internal function to read file into Dictionary
@@ -148,6 +149,7 @@ namespace Services
             return dict;
         }
 
+        //Create a headstone struct based on the data in the dictionary to update the database
         public bool UpdateHeadstone(ref Headstone h, Dictionary<string, string> tmpData)
         {
             // Write data to the Headstone - no overwrite of existing data

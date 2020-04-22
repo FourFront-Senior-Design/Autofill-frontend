@@ -1,4 +1,5 @@
-﻿namespace DataStructures
+﻿/* Used to store the Location table data*/
+namespace DataStructures
 {
     public class LocationData
     {

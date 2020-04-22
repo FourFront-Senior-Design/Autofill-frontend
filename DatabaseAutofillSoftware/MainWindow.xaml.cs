@@ -51,6 +51,7 @@ namespace DatabaseAutofillSoftware
                 Properties.Settings.Default.databaseFilePath = _viewModel.FileLocation;
                 Properties.Settings.Default.Save();
 
+                // Displays info in the progress bar
                 autofillProgress.Visibility = Visibility.Visible;
                 BackgroundWorker worker = new BackgroundWorker();
                 worker.WorkerReportsProgress = true;
@@ -67,24 +68,21 @@ namespace DatabaseAutofillSoftware
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             (sender as BackgroundWorker).ReportProgress(1);
-
             _viewModel.SetMessage("Database loaded successfully...");
             _database.CreateRecordTypeFile();
 
+            // Google vision
             (sender as BackgroundWorker).ReportProgress(10);
-            
             _viewModel.SetMessage("Google Vision running...");
+            _autofillService.RunScripts(_viewModel.FileLocation); 
 
-            _autofillService.RunScripts(_viewModel.FileLocation);
-
+            // Autofill scripts
             (sender as BackgroundWorker).ReportProgress(75);
-
             _viewModel.SetMessage("Autofill scripts running...");
-
             int missedRecordsCount = _outputReader.FillDatabase();
 
+            // Check for errors
             (sender as BackgroundWorker).ReportProgress(100);
-
             if (missedRecordsCount > 0)
             {
                 _viewModel.SetMessage("Missed " + missedRecordsCount + " records, please retry this section");

@@ -8,6 +8,7 @@ namespace ServicesInterface
 {
     public interface IAutofillController
     {
+        // Runs google vision and the autofill scripts
         void RunScripts(string filePath);
     }
 }
