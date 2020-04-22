@@ -20,5 +20,6 @@ The Database Auto-full Software GUI projects is the frontend of the auto-fill pr
 * Error handling
 
 ### Development
-* The project uses [MVVM design Pattern](https://docs.microsoft.com/en-us/archive/msdn-magazine/2009/february/patterns-wpf-apps-with-the-model-view-viewmodel-design-pattern).
+* The project uses [MVVM design Pattern](https://docs.microsoft.com/en-us/archive/msdn-magazine/2009/february/patterns-wpf-apps-with-the-model-view-viewmodel-design-pattern). 
+* [Here](https://docs.microsoft.com/en-us/dotnet/framework/wpf/getting-started/walkthrough-my-first-wpf-desktop-application) is a tutorial on creating a WPF desktop application.
 * Contributors and future developers are requested to [fork](https://guides.github.com/activities/forking/) from this project.
