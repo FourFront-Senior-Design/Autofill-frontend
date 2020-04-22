@@ -2,7 +2,7 @@
 
 [![Build Status](https://dev.azure.com/ShashwatiShradha/Database%20Autofill%20Software/_apis/build/status/FourFront-Senior-Design.categorization?branchName=development)](https://dev.azure.com/ShashwatiShradha/Database%20Autofill%20Software/_build/latest?definitionId=2&branchName=development) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/FourFront-Senior-Design/AutofillFrontend/blob/master/Copyright)
 
-The Database Auto-full Software GUI projects is the frontend of the auto-fill project. It asks the user the name of the section that needs to be auto-filled, and on-clicking the auto-fill button, it runs the backend scripts to fill the MS Access Database. It updates the user of the current step the scripts are on using a progress bar. Open the MS Access database or use the Data Entry Form to verify that the section is filled.
+The Database Auto-full Software GUI projects is the frontend of the auto-fill project. It asks the user the name of the section that needs to be auto-filled, and on-clicking the auto-fill button, it runs the backend scripts to fill the MS Access Database. It updates the user of the current step the scripts are on using a progress bar. Open the MS Access database or use the [Data Entry Form](https://github.com/FourFront-Senior-Design/DataEntryForm) to verify that the section is filled.
 
 ### Prerequisites
 * [Microsoft Access Database Manager 2010 (x64 bit)](https://www.microsoft.com/en-US/download/details.aspx?id=13255)
