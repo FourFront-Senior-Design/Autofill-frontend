@@ -1,4 +1,6 @@
-﻿using System;
+﻿/* Data structure used to store the headstone/record 
+ * information displayed on the current page*/
+using System;
 using System.Collections.Generic;
 
 namespace DataStructures

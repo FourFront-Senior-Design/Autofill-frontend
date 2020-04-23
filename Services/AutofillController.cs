@@ -6,6 +6,8 @@ namespace Services
 {
     public class AutofillController : IAutofillController
     {
+        // Runs the controller that runs the scripts to run google vision
+        // and create the tempfiles with the extracted texts
         public void RunScripts(string filePath)
         {
             String pythonInstallation = @"C:\Python";
