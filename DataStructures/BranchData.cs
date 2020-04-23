@@ -1,4 +1,5 @@
-﻿namespace DataStructures
+﻿/* Used to store the Branch table data*/
+namespace DataStructures
 {
     public class BranchData
     {

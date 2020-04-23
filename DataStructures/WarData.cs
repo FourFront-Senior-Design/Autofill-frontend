@@ -1,4 +1,5 @@
-﻿namespace DataStructures
+﻿/* Used to store the War table data*/
+namespace DataStructures
 {
     public class WarData
     {

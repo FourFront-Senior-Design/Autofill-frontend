@@ -1,4 +1,5 @@
-﻿namespace Common
+﻿/* Contains the column names from the Master Table*/
+namespace Common
 {
     public static class Constants
     {

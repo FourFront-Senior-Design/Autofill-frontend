@@ -1,4 +1,5 @@
-﻿namespace DataStructures
+﻿/* Used to store the Awards table data*/
+namespace DataStructures
 {
     public class AwardData
     {

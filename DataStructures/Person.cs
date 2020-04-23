@@ -1,4 +1,5 @@
-﻿using System;
+﻿/* Used to store the information of a decedent */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
